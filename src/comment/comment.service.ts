@@ -3,6 +3,8 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { comments } from 'src/db/comments';
 import { CreateCommentDto } from './dto';
 import { Comment } from './types';
+import { User } from 'src/user/types';
+import { Article } from 'src/article/types';
 
 @Injectable()
 export class CommentService {
@@ -35,5 +37,21 @@ export class CommentService {
   deleteComment(comment: Comment) {
     const commentIndex = comments.findIndex(({ id }) => id === comment.id);
     comments.splice(commentIndex, 1);
+  }
+
+  deleteUserComments(user: User) {
+    for (let i = comments.length - 1; i >= 0; i--) {
+      if (comments[i].authorId === user.id) {
+        comments.splice(i, 1);
+      }
+    }
+  }
+
+  removeArticleFromComment(article: Article) {
+    for (let i = comments.length - 1; i >= 0; i--) {
+      if (comments[i].articleId === article.id) {
+        comments.splice(i, 1);
+      }
+    }
   }
 }

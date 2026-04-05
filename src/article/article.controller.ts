@@ -13,6 +13,7 @@ import {
 import { UserService } from 'src/user/user.service';
 import { ArticleService } from './article.service';
 import { CategoryService } from 'src/category/category.service';
+import { CommentService } from 'src/comment/comment.service';
 import { ArticleQueryDto, CreateArticleDto, UpdateArticleDto } from './dto';
 import { Article } from './types';
 
@@ -22,6 +23,7 @@ export class ArticleController {
     private readonly articleService: ArticleService,
     private readonly userService: UserService,
     private readonly catergoryService: CategoryService,
+    private readonly commentService: CommentService,
   ) {}
 
   @Get()
@@ -73,5 +75,6 @@ export class ArticleController {
   deleteArticle(@Param('id', new ParseUUIDPipe()) id: string) {
     const article = this.articleService.getArticleById(id);
     this.articleService.deleteArticle(article);
+    this.commentService.removeArticleFromComment(article)
   }
 }

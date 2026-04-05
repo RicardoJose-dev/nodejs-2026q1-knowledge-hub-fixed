@@ -11,11 +11,17 @@ import {
 } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
 import { UserService } from './user.service';
+import { ArticleService } from 'src/article/article.service';
+import { CommentService } from 'src/comment/comment.service';
 import { CreateUserDto, UpdatePasswordDto, UserResponseDto } from './dto';
 
 @Controller('user')
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(
+    private readonly userService: UserService,
+    private readonly articleService: ArticleService,
+    private readonly commentService: CommentService,
+  ) {}
 
   @Get()
   @HttpCode(200)
@@ -57,5 +63,7 @@ export class UserController {
   deleteUser(@Param('userId', new ParseUUIDPipe()) userId: string) {
     const user = this.userService.getUserById(userId);
     this.userService.deleteUser(user);
+    this.articleService.removeUserFromArticle(user);
+    this.commentService.deleteUserComments(user);
   }
 }

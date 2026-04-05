@@ -10,12 +10,16 @@ import {
   ParseUUIDPipe,
 } from '@nestjs/common';
 import { CategoryService } from './category.service';
+import { ArticleService } from 'src/article/article.service';
 import { CreateCategoryDto, UpdateCategorydDto } from './dto';
 import { Category } from './types';
 
 @Controller('category')
 export class CategoryController {
-  constructor(private readonly categoryService: CategoryService) {}
+  constructor(
+    private readonly categoryService: CategoryService,
+    private readonly articleService: ArticleService,
+  ) {}
 
   @Get()
   @HttpCode(200)
@@ -50,5 +54,6 @@ export class CategoryController {
   deleteCategory(@Param('id', new ParseUUIDPipe()) id: string) {
     const category = this.categoryService.getCategoryById(id);
     this.categoryService.deleteCategory(category);
+    this.articleService.removeCategoryFromArticle(category)
   }
 }

@@ -4,6 +4,8 @@ import { articles } from 'src/db/articles';
 import { ArticleQueryDto, CreateArticleDto, UpdateArticleDto } from './dto';
 import { hasStatus, hasCategoryId, hasTag } from './utils';
 import { Article, ArticleStatus } from './types';
+import { User } from 'src/user/types';
+import { Category } from 'src/category/types';
 
 @Injectable()
 export class ArticleService {
@@ -21,9 +23,7 @@ export class ArticleService {
 
   getArticleById(
     articleId: string,
-    ExceptionClass: new (
-      message: string,
-    ) => HttpException = NotFoundException,
+    ExceptionClass: new (message: string) => HttpException = NotFoundException,
   ): Article {
     const article = articles.find(({ id }) => id === articleId);
     if (!article) {
@@ -69,5 +69,21 @@ export class ArticleService {
   deleteArticle(article: Article) {
     const articleIndex = articles.findIndex(({ id }) => id === article.id);
     articles.splice(articleIndex, 1);
+  }
+
+  removeUserFromArticle(user: User) {
+    articles.forEach((article, index) => {
+      if (article.authorId === user.id) {
+        articles[index].authorId = null;
+      }
+    });
+  }
+
+  removeCategoryFromArticle(category: Category) {
+    articles.forEach((article, index) => {
+      if (article.categoryId === category.id) {
+        articles[index].categoryId = null;
+      }
+    });
   }
 }
