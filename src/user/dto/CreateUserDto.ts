@@ -14,7 +14,7 @@ export class CreateUserDto {
   password: string;
 
   @IsString()
-  @ApiProperty()
+  @ApiProperty({ required: false })
   @IsIn(['admin', 'editor', 'viewer'])
   @IsOptional()
   role?: UserRole;

@@ -21,22 +21,22 @@ export class CreateArticleDto {
   content: string;
 
   @IsEnum(ArticleStatus)
-  @ApiProperty()
+  @ApiProperty({ required: false })
   @IsOptional()
   status?: ArticleStatus;
 
   @IsUUID()
-  @ApiProperty()
+  @ApiProperty({ required: false })
   @IsOptional()
   authorId?: string;
 
   @IsUUID()
-  @ApiProperty()
+  @ApiProperty({ required: false })
   @IsOptional()
   categoryId?: string;
 
   @IsArray()
-  @ApiProperty()
+  @ApiProperty({ required: false })
   @IsOptional()
   @IsString({ each: true })
   tags?: string[];

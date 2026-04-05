@@ -5,16 +5,16 @@ import { ArticleStatus } from '../types';
 export class ArticleQueryDto {
   @IsOptional()
   @IsString()
-  @ApiProperty()
+  @ApiProperty({ required: false })
   status?: ArticleStatus;
 
   @IsOptional()
   @IsString()
-  @ApiProperty()
+  @ApiProperty({ required: false })
   categoryId?: string;
 
   @IsOptional()
   @IsString()
-  @ApiProperty()
+  @ApiProperty({ required: false })
   tag?: string;
 }

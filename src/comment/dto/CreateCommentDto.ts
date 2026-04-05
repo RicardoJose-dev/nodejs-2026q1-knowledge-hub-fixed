@@ -13,7 +13,7 @@ export class CreateCommentDto {
   articleId: string;
 
   @IsUUID()
-  @ApiProperty()
+  @ApiProperty({ required: false })
   @IsOptional()
   authorId?: string;
 }
