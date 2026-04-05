@@ -1,5 +1,5 @@
 import { randomUUID } from 'crypto';
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, HttpException } from '@nestjs/common';
 import { articles } from 'src/db/articles';
 import { ArticleQueryDto, CreateArticleDto, UpdateArticleDto } from './dto';
 import { hasStatus, hasCategoryId, hasTag } from './utils';
@@ -19,10 +19,15 @@ export class ArticleService {
     return articles;
   }
 
-  getArticleById(articleId: string): Article {
+  getArticleById(
+    articleId: string,
+    ExceptionClass: new (
+      message: string,
+    ) => HttpException = NotFoundException,
+  ): Article {
     const article = articles.find(({ id }) => id === articleId);
     if (!article) {
-      throw new NotFoundException('Article not found');
+      throw new ExceptionClass('Article not found');
     }
 
     return article;

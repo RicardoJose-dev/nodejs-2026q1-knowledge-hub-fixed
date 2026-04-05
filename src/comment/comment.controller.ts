@@ -12,6 +12,7 @@ import {
 import { CommentService } from './comment.service';
 import { UserService } from 'src/user/user.service';
 import { ArticleService } from 'src/article/article.service';
+import { UnprocessableContentException } from 'src/exception';
 import { CreateCommentDto, CommentQueryDto } from './dto';
 import { Comment } from './types';
 
@@ -40,7 +41,10 @@ export class CommentController {
     }
 
     if (articleId) {
-      this.articleService.getArticleById(articleId);
+      this.articleService.getArticleById(
+        articleId,
+        UnprocessableContentException,
+      );
     }
 
     return this.commentService.createComment(body);
