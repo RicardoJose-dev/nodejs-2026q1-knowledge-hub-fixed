@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsUUID, IsArray } from 'class-validator';
+import { IsString, IsOptional, IsUUID, IsArray, IsEnum } from 'class-validator';
 import { ArticleStatus } from '../types';
 
 export class UpdateArticleDto {
@@ -10,8 +10,8 @@ export class UpdateArticleDto {
   @IsOptional()
   content?: string;
 
-  @IsString()
   @IsOptional()
+  @IsEnum(ArticleStatus)
   status?: ArticleStatus;
 
   @IsUUID()

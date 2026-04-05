@@ -39,13 +39,16 @@ export class CategoryService {
       ...body,
     };
 
-    categories.map((dbCategory) =>
-      dbCategory.id !== category.id ? dbCategory : updateCategory,
-    );
+    categories.forEach((dbCategory, index) => {
+      if (dbCategory.id === category.id) {
+        categories[index] = updateCategory;
+      }
+    });
     return updateCategory;
   }
 
   deleteCategory(category: Category) {
-    categories.filter(({ id }) => id !== category.id);
+    const categoryIndex = categories.findIndex(({ id }) => id === category.id);
+    categories.splice(categoryIndex, 1);
   }
 }

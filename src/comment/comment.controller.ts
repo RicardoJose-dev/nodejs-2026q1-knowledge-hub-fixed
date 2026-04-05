@@ -3,7 +3,6 @@ import {
   Query,
   Get,
   Post,
-  Put,
   Delete,
   HttpCode,
   Param,
@@ -13,7 +12,7 @@ import {
 import { CommentService } from './comment.service';
 import { UserService } from 'src/user/user.service';
 import { ArticleService } from 'src/article/article.service';
-import { CreateCommentDto } from './dto';
+import { CreateCommentDto, CommentQueryDto } from './dto';
 import { Comment } from './types';
 
 @Controller('comment')
@@ -24,11 +23,10 @@ export class CommentController {
     private readonly articleService: ArticleService,
   ) {}
 
-  @Get(':articleId')
+  @Get()
   @HttpCode(200)
-  getArticleComments(
-    @Param('articleId', new ParseUUIDPipe()) articleId: string,
-  ): Comment[] {
+  getArticleComments(@Query() query: CommentQueryDto): Comment[] {
+    const { articleId } = query;
     return this.commentService.getArticleComments(articleId);
   }
 

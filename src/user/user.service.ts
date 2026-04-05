@@ -54,12 +54,16 @@ export class UserService {
       updatedAt: Date.now(),
     };
 
-    users.map((dbUser) => (dbUser.id !== user.id ? dbUser : updatedUser));
-
+    users.forEach((dbUser, index) => {
+      if (dbUser.id === user.id) {
+        users[index] = updatedUser;
+      }
+    });
     return updatedUser;
   }
 
   deleteUser(user: User) {
-    users.filter(({ id }) => id !== user.id);
+    const userIndex = users.findIndex(({ id }) => id === user.id);
+    users.splice(userIndex, 1);
   }
 }

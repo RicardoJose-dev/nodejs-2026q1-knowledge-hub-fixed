@@ -52,13 +52,17 @@ export class ArticleService {
       updatedAt: Date.now(),
     };
 
-    articles.map((dbArticle) =>
-      dbArticle.id !== article.id ? dbArticle : updatedArticle,
-    );
+    articles.forEach((dbArticle, index) => {
+      if (dbArticle.id === article.id) {
+        articles[index] = updatedArticle;
+      }
+    });
+
     return updatedArticle;
   }
 
   deleteArticle(article: Article) {
-    articles.filter(({ id }) => id !== article.id);
+    const articleIndex = articles.findIndex(({ id }) => id === article.id);
+    articles.splice(articleIndex, 1);
   }
 }

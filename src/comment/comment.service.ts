@@ -33,6 +33,7 @@ export class CommentService {
   }
 
   deleteComment(comment: Comment) {
-    comments.filter(({ id }) => id !== comment.id);
+    const commentIndex = comments.findIndex(({ id }) => id === comment.id);
+    comments.splice(commentIndex, 1);
   }
 }

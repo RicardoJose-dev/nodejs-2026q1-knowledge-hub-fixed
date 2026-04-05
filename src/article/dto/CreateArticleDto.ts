@@ -4,6 +4,7 @@ import {
   IsOptional,
   IsUUID,
   IsArray,
+  IsEnum,
 } from 'class-validator';
 import { ArticleStatus } from '../types';
 
@@ -16,8 +17,8 @@ export class CreateArticleDto {
   @IsNotEmpty()
   content: string;
 
-  @IsString()
   @IsOptional()
+  @IsEnum(ArticleStatus)
   status?: ArticleStatus;
 
   @IsUUID()
