@@ -2,7 +2,7 @@ import { randomUUID } from 'crypto';
 import {
   Injectable,
   NotFoundException,
-  BadRequestException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { CreateUserDto, UpdatePasswordDto } from './dto';
 import { users } from 'src/db/user';
@@ -45,7 +45,7 @@ export class UserService {
     const { password: currentPasswrod } = user;
 
     if (currentPasswrod !== oldPassword) {
-      throw new BadRequestException('old password does not match');
+      throw new ForbiddenException('old password does not match');
     }
 
     const updatedUser = {
