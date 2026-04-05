@@ -9,6 +9,7 @@ import {
   Body,
   ParseUUIDPipe,
 } from '@nestjs/common';
+import { ApiOperation } from '@nestjs/swagger';
 import { CommentService } from './comment.service';
 import { UserService } from 'src/user/user.service';
 import { ArticleService } from 'src/article/article.service';
@@ -25,6 +26,7 @@ export class CommentController {
   ) {}
 
   @Get()
+  @ApiOperation({ summary: 'Get comments by article id' })
   @HttpCode(200)
   getArticleComments(@Query() query: CommentQueryDto): Comment[] {
     const { articleId } = query;
@@ -32,6 +34,7 @@ export class CommentController {
   }
 
   @Post()
+  @ApiOperation({ summary: 'Create comment' })
   @HttpCode(201)
   createComment(@Body() body: CreateCommentDto): Comment {
     const { authorId, articleId } = body;
@@ -51,6 +54,7 @@ export class CommentController {
   }
 
   @Delete(':id')
+  @ApiOperation({ summary: 'Delete comment' })
   @HttpCode(204)
   deleteComment(@Param('id', new ParseUUIDPipe()) id: string) {
     const comment = this.commentService.getCommentById(id);

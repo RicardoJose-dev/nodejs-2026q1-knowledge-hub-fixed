@@ -1,3 +1,3 @@
-export * from './CreateUserDto'
-export * from './UpdatePasswordDto'
-export * from './UserResponseDto'
+export * from './CreateUserDto';
+export * from './UpdatePasswordDto';
+export * from './UserResponseDto';

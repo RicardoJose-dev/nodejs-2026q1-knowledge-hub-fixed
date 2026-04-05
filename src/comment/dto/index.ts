@@ -1,2 +1,2 @@
-export * from './CommentQueryDto'
+export * from './CommentQueryDto';
 export * from './CreateCommentDto';

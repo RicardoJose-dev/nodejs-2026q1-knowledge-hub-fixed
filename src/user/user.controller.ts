@@ -10,6 +10,7 @@ import {
   ParseUUIDPipe,
 } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
+import { ApiOperation } from '@nestjs/swagger';
 import { UserService } from './user.service';
 import { ArticleService } from 'src/article/article.service';
 import { CommentService } from 'src/comment/comment.service';
@@ -24,6 +25,7 @@ export class UserController {
   ) {}
 
   @Get()
+  @ApiOperation({ summary: 'Get all users' })
   @HttpCode(200)
   getUsers(): UserResponseDto[] {
     const users = this.userService.getUsers();
@@ -31,6 +33,7 @@ export class UserController {
   }
 
   @Get(':userId')
+  @ApiOperation({ summary: 'Get user by id' })
   @HttpCode(200)
   getUserById(
     @Param('userId', new ParseUUIDPipe()) userId: string,
@@ -40,6 +43,7 @@ export class UserController {
   }
 
   @Post()
+  @ApiOperation({ summary: 'Create user' })
   @HttpCode(201)
   createUser(@Body() body: CreateUserDto): UserResponseDto {
     const user = this.userService.createUser(body);
@@ -47,6 +51,7 @@ export class UserController {
   }
 
   @Put(':userId')
+  @ApiOperation({ summary: 'update user' })
   @HttpCode(200)
   updateUser(
     @Param('userId', new ParseUUIDPipe()) userId: string,
@@ -59,6 +64,7 @@ export class UserController {
   }
 
   @Delete(':userId')
+  @ApiOperation({ summary: 'Delete user' })
   @HttpCode(204)
   deleteUser(@Param('userId', new ParseUUIDPipe()) userId: string) {
     const user = this.userService.getUserById(userId);
