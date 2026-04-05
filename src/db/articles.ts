@@ -1,3 +1,3 @@
-import { Article } from 'src/user/types';
+import { Article } from "src/article/types";
 
 export const articles: Article[] = [];

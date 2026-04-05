@@ -1,2 +1,2 @@
-export * from './CreateUserDto';
+export * from './CreateCategoryDto';
 export * from './UpdateCategoryDto';
