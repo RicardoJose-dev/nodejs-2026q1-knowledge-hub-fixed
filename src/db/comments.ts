@@ -1,3 +1,3 @@
-import { Comment } from 'src/user/types';
+import { Comment } from 'src/comment/types';
 
 export const comments: Comment[] = [];

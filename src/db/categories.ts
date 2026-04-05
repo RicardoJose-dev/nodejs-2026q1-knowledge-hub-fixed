@@ -1,3 +1,3 @@
-import { Category } from 'src/user/types';
+import { Category } from 'src/category/types';
 
 export const categories: Category[] = [];

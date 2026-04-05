@@ -7,7 +7,6 @@ import { Article, ArticleStatus } from './types';
 
 @Injectable()
 export class ArticleService {
-  articleHasPropValueFact;
   getArticles(query: ArticleQueryDto): Article[] {
     if (Object.values(query).length) {
       return articles.filter(
@@ -50,6 +49,7 @@ export class ArticleService {
     const updatedArticle = {
       ...article,
       ...body,
+      updatedAt: Date.now(),
     };
 
     articles.map((dbArticle) =>

@@ -12,17 +12,3 @@ export interface User {
   createdAt: number;
   updatedAt: number;
 }
-
-export interface Category {
-  id: string;
-  name: string;
-  description: string;
-}
-
-export interface Comment {
-  id: string;
-  content: string;
-  articleId: string;
-  authorId: string | null;
-  createdAt: number;
-}
