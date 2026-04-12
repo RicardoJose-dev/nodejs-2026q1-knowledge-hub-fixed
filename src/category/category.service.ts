@@ -10,7 +10,7 @@ export class CategoryService {
   }
 
   async getCategoryById(categoryId: string): Promise<Category> {
-    const category = dbClient.category.findUnique({
+    const category = await dbClient.category.findUnique({
       where: {
         id: categoryId,
       },

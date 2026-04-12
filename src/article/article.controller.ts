@@ -44,15 +44,15 @@ export class ArticleController {
   @Post()
   @ApiOperation({ summary: 'Create article' })
   @HttpCode(201)
-  createArticle(@Body() body: CreateArticleDto): Promise<Article> {
+  async createArticle(@Body() body: CreateArticleDto): Promise<Article> {
     const { authorId, categoryId } = body;
 
     if (authorId) {
-      this.userService.getUserById(authorId);
+      await this.userService.getUserById(authorId);
     }
 
     if (categoryId) {
-      this.catergoryService.getCategoryById(categoryId);
+      await this.catergoryService.getCategoryById(categoryId);
     }
 
     return this.articleService.createArticle(body);
@@ -68,7 +68,7 @@ export class ArticleController {
     const { categoryId } = body;
 
     if (categoryId) {
-      this.catergoryService.getCategoryById(categoryId);
+      await this.catergoryService.getCategoryById(categoryId);
     }
 
     const article = await this.articleService.getArticleById(id);

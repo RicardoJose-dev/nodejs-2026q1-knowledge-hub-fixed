@@ -29,18 +29,18 @@ export class UserController {
   @Get(':userId')
   @ApiOperation({ summary: 'Get user by id' })
   @HttpCode(200)
-  getUserById(
+  async getUserById(
     @Param('userId', new ParseUUIDPipe()) userId: string,
-  ): UserResponseDto {
-    const user = this.userService.getUserById(userId);
+  ): Promise<UserResponseDto> {
+    const user = await this.userService.getUserById(userId);
     return plainToInstance(UserResponseDto, user);
   }
 
   @Post()
   @ApiOperation({ summary: 'Create user' })
   @HttpCode(201)
-  createUser(@Body() body: CreateUserDto): UserResponseDto {
-    const user = this.userService.createUser(body);
+  async createUser(@Body() body: CreateUserDto): Promise<UserResponseDto> {
+    const user = await this.userService.createUser(body);
     return plainToInstance(UserResponseDto, user);
   }
 
