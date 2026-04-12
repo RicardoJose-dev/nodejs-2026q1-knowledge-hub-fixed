@@ -1,16 +1,8 @@
-import 'dotenv/config';
-import { Pool } from 'pg';
-import { PrismaPg } from '@prisma/adapter-pg';
-import { ArticleStatus, PrismaClient, UserRole } from './client/client';
-
-const connectionString = `${process.env.DATABASE_URL}`;
-const pool = new Pool({ connectionString });
-const adapter = new PrismaPg(pool);
-
-const prisma = new PrismaClient({ adapter });
+import { ArticleStatus, UserRole } from './client/client';
+import dbClient from './dbClient';
 
 async function main() {
-  const user1 = await prisma.user.create({
+  const user1 = await dbClient.user.create({
     data: {
       login: 'user1',
       password: 'passuser1',
@@ -18,7 +10,7 @@ async function main() {
     },
   });
 
-  const user2 = await prisma.user.create({
+  const user2 = await dbClient.user.create({
     data: {
       login: 'user2',
       password: 'user2pas',
@@ -26,7 +18,7 @@ async function main() {
     },
   });
 
-  const categories = await prisma.category.createMany({
+  await dbClient.category.createMany({
     data: [
       { name: 'Tech', description: 'Technology news and articles' },
       { name: 'Health', description: 'Health and wellness' },
@@ -34,9 +26,9 @@ async function main() {
     ],
   });
 
-  const allCategories = await prisma.category.findMany();
+  const allCategories = await dbClient.category.findMany();
 
-  const tags = await prisma.tag.createMany({
+  await dbClient.tag.createMany({
     data: [
       { name: 'Opinion' },
       { name: 'Gaming' },
@@ -46,12 +38,12 @@ async function main() {
     ],
   });
 
-  const allTags = await prisma.tag.findMany();
+  const allTags = await dbClient.tag.findMany();
 
   // Create articles
   const articles = [];
   for (let i = 0; i < 5; i++) {
-    const article = await prisma.article.create({
+    const article = await dbClient.article.create({
       data: {
         title: `Sample Article ${i + 1}`,
         content: `This is the content for article ${i + 1}.`,
@@ -75,7 +67,7 @@ async function main() {
     articles.push(article);
   }
 
-  await prisma.comment.createMany({
+  await dbClient.comment.createMany({
     data: [
       {
         content: 'Great article!',
@@ -102,5 +94,5 @@ main()
     process.exit(1);
   })
   .finally(async () => {
-    await prisma.$disconnect();
+    await dbClient.$disconnect();
   });

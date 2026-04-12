@@ -4,7 +4,7 @@ import { articles } from 'src/db/articles';
 import { ArticleQueryDto, CreateArticleDto, UpdateArticleDto } from './dto';
 import { hasStatus, hasCategoryId, hasTag } from './utils';
 import { Article, ArticleStatus } from './types';
-import { User } from 'src/user/types';
+import { User } from 'src/db/prisma/client/client';
 import { Category } from 'src/category/types';
 
 @Injectable()

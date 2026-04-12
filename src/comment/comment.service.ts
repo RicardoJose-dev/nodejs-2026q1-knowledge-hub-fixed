@@ -3,7 +3,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { comments } from 'src/db/comments';
 import { CreateCommentDto } from './dto';
 import { Comment } from './types';
-import { User } from 'src/user/types';
+import { User } from 'src/db/prisma/client/client';
 import { Article } from 'src/article/types';
 
 @Injectable()

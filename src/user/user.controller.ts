@@ -12,23 +12,17 @@ import {
 import { plainToInstance } from 'class-transformer';
 import { ApiOperation } from '@nestjs/swagger';
 import { UserService } from './user.service';
-import { ArticleService } from 'src/article/article.service';
-import { CommentService } from 'src/comment/comment.service';
 import { CreateUserDto, UpdatePasswordDto, UserResponseDto } from './dto';
 
 @Controller('user')
 export class UserController {
-  constructor(
-    private readonly userService: UserService,
-    private readonly articleService: ArticleService,
-    private readonly commentService: CommentService,
-  ) {}
+  constructor(private readonly userService: UserService) {}
 
   @Get()
   @ApiOperation({ summary: 'Get all users' })
   @HttpCode(200)
-  getUsers(): UserResponseDto[] {
-    const users = this.userService.getUsers();
+  async getUsers(): Promise<UserResponseDto[]> {
+    const users = await this.userService.getUsers();
     return plainToInstance(UserResponseDto, users);
   }
 
@@ -53,11 +47,11 @@ export class UserController {
   @Put(':userId')
   @ApiOperation({ summary: 'update user' })
   @HttpCode(200)
-  updateUser(
+  async updateUser(
     @Param('userId', new ParseUUIDPipe()) userId: string,
     @Body() body: UpdatePasswordDto,
-  ): UserResponseDto {
-    const user = this.userService.getUserById(userId);
+  ): Promise<UserResponseDto> {
+    const user = await this.userService.getUserById(userId);
     const updatedUser = this.userService.updateUser(user, body);
 
     return plainToInstance(UserResponseDto, updatedUser);
@@ -66,10 +60,8 @@ export class UserController {
   @Delete(':userId')
   @ApiOperation({ summary: 'Delete user' })
   @HttpCode(204)
-  deleteUser(@Param('userId', new ParseUUIDPipe()) userId: string) {
-    const user = this.userService.getUserById(userId);
+  async deleteUser(@Param('userId', new ParseUUIDPipe()) userId: string) {
+    const user = await this.userService.getUserById(userId);
     this.userService.deleteUser(user);
-    this.articleService.removeUserFromArticle(user);
-    this.commentService.deleteUserComments(user);
   }
 }
