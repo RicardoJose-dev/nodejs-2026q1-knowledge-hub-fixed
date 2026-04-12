@@ -15,12 +15,33 @@ git clone {repository URL}
 
 ```
 npm install
+
+docker compose up --build 
+(use localhost for POSTGRES_HOST if running the command outside the docker container)
+
+i.e
+
+DATABASE_URL="postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@localhost:{POSTGRES_PORT}/{POSTGRES_DB}" npx prisma migrate dev
+
+
+npx prisma db seed --schema=src/db/schema.prisma 
+(use localhost for POSTGRES_HOST if running the command outside the docker container)
+
+i.e
+
+DATABASE_URL="postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@localhost:{POSTGRES_PORT}/{POSTGRES_DB}" npx prisma db seed --schema=src/db/schema.prisma
 ```
 
 ## Running application
 
 ```
 npm start
+
+npx prisma migrate dev
+
+npx prisma db seed
+
+
 ```
 
 After starting the app on port (4000 as default) you can open
