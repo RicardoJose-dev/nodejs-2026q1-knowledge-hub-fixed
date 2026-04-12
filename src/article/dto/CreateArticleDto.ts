@@ -7,7 +7,7 @@ import {
   IsEnum,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { ArticleStatus } from '../types';
+import { ArticleStatus } from 'src/db/prisma/client/client';
 
 export class CreateArticleDto {
   @IsString()

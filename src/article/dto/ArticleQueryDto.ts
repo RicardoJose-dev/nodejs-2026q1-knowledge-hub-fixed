@@ -1,6 +1,6 @@
 import { IsOptional, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { ArticleStatus } from '../types';
+import { ArticleStatus } from 'src/db/prisma/client/client';
 
 export class ArticleQueryDto {
   @IsOptional()
