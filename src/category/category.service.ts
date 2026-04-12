@@ -1,17 +1,21 @@
-import { randomUUID } from 'crypto';
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { categories } from 'src/db/categories';
+import dbClient from 'src/db/prisma/dbClient';
 import { CreateCategoryDto, UpdateCategorydDto } from './dto';
-import { Category } from './types';
+import { Category } from 'src/db/prisma/client/client';
 
 @Injectable()
 export class CategoryService {
-  getCategories(): Category[] {
-    return categories;
+  getCategories(): Promise<Category[]> {
+    return dbClient.category.findMany();
   }
 
-  getCategoryById(categoryId: string): Category {
-    const category = categories.find(({ id }) => id === categoryId);
+  async getCategoryById(categoryId: string): Promise<Category> {
+    const category = dbClient.category.findUnique({
+      where: {
+        id: categoryId,
+      },
+    });
+
     if (!category) {
       throw new NotFoundException('Category not found');
     }
@@ -19,36 +23,36 @@ export class CategoryService {
     return category;
   }
 
-  createCategory(body: CreateCategoryDto): Category {
+  async createCategory(body: CreateCategoryDto): Promise<Category> {
     const { name, description } = body;
 
-    const newCategory: Category = {
-      id: randomUUID(),
-      name,
-      description,
-    };
-
-    categories.push(newCategory);
+    const newCategory = await dbClient.category.create({
+      data: {
+        name,
+        description,
+      },
+    });
 
     return newCategory;
   }
 
-  updateCategory(category: Category, body: UpdateCategorydDto) {
-    const updateCategory = {
-      ...category,
-      ...body,
-    };
-
-    categories.forEach((dbCategory, index) => {
-      if (dbCategory.id === category.id) {
-        categories[index] = updateCategory;
-      }
+  async updateCategory(
+    category: Category,
+    body: UpdateCategorydDto,
+  ): Promise<Category> {
+    const updateCategory = await dbClient.category.update({
+      where: {
+        id: category.id,
+      },
+      data: {
+        ...body,
+      },
     });
+
     return updateCategory;
   }
 
   deleteCategory(category: Category) {
-    const categoryIndex = categories.findIndex(({ id }) => id === category.id);
-    categories.splice(categoryIndex, 1);
+    dbClient.category.delete({ where: { id: category.id } });
   }
 }
