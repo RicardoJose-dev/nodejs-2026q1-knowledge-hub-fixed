@@ -15,7 +15,7 @@ import { UserService } from 'src/user/user.service';
 import { ArticleService } from 'src/article/article.service';
 import { UnprocessableContentException } from 'src/exception';
 import { CreateCommentDto, CommentQueryDto } from './dto';
-import { Comment } from './types';
+import { Comment } from 'src/db/prisma/client/client';
 
 @Controller('comment')
 export class CommentController {
@@ -28,7 +28,7 @@ export class CommentController {
   @Get()
   @ApiOperation({ summary: 'Get comments by article id' })
   @HttpCode(200)
-  getArticleComments(@Query() query: CommentQueryDto): Comment[] {
+  getArticleComments(@Query() query: CommentQueryDto): Promise<Comment[]> {
     const { articleId } = query;
     return this.commentService.getArticleComments(articleId);
   }
@@ -36,15 +36,15 @@ export class CommentController {
   @Post()
   @ApiOperation({ summary: 'Create comment' })
   @HttpCode(201)
-  createComment(@Body() body: CreateCommentDto): Comment {
+  async createComment(@Body() body: CreateCommentDto): Promise<Comment> {
     const { authorId, articleId } = body;
 
     if (authorId) {
-      this.userService.getUserById(authorId);
+      await this.userService.getUserById(authorId);
     }
 
     if (articleId) {
-      this.articleService.getArticleById(
+      await this.articleService.getArticleById(
         articleId,
         UnprocessableContentException,
       );
@@ -56,8 +56,8 @@ export class CommentController {
   @Delete(':id')
   @ApiOperation({ summary: 'Delete comment' })
   @HttpCode(204)
-  deleteComment(@Param('id', new ParseUUIDPipe()) id: string) {
-    const comment = this.commentService.getCommentById(id);
+  async deleteComment(@Param('id', new ParseUUIDPipe()) id: string) {
+    const comment = await this.commentService.getCommentById(id);
     this.commentService.deleteComment(comment);
   }
 }

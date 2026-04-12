@@ -81,6 +81,5 @@ export class ArticleController {
   deleteArticle(@Param('id', new ParseUUIDPipe()) id: string) {
     const article = this.articleService.getArticleById(id);
     this.articleService.deleteArticle(article);
-    this.commentService.removeArticleFromComment(article);
   }
 }
