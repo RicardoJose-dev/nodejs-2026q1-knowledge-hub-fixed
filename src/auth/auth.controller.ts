@@ -16,11 +16,10 @@ export class AuthController {
   @HttpCode(201)
   async signup(@Body() body: SignupBody): Promise<{ message: string }> {
     const { login, password } = body;
-    const hashedPassword = await this.authService.hashValue(password);
 
     await this.userService.createUser({
       login,
-      password: hashedPassword,
+      password,
     });
 
     return { message: 'user successfully created' };
@@ -33,7 +32,7 @@ export class AuthController {
     @Body() body: LoginBody,
   ): Promise<{ accessToken: string; refreshToken: string }> {
     const { login, password } = body;
-    const hashedPassword = await this.authService.hashValue(password);
+    const hashedPassword = await this.userService.hashValue(password);
 
     const user = await this.userService.getUserByCredentials({
       login,
@@ -53,7 +52,7 @@ export class AuthController {
     @Body() body: RefreshBody,
   ): Promise<{ accessToken: string; refreshToken: string }> {
     const { refreshToken } = body;
-    const { login, userId } = this.authService.verifyToken(refreshToken);
+    const { login, userId } = this.authService.verifyRefreshToken(refreshToken);
 
     const user = await this.userService.getUserByCredentials({
       id: userId,

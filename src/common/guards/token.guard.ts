@@ -4,6 +4,7 @@ import {
   ExecutionContext,
   UnauthorizedException,
 } from '@nestjs/common';
+import { verifyAccessToken } from 'src/auth/utils';
 
 @Injectable()
 export class TokenGuard implements CanActivate {
@@ -23,6 +24,7 @@ export class TokenGuard implements CanActivate {
       throw new UnauthorizedException('Token not found');
     }
 
+    request.user = verifyAccessToken(token);
     return true;
   }
 }
