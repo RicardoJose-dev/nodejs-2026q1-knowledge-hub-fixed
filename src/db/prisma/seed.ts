@@ -4,9 +4,9 @@ import dbClient from './dbClient';
 async function main() {
   const user1 = await dbClient.user.create({
     data: {
-      login: 'user1',
-      password: 'passuser1',
-      role: UserRole.EDITOR,
+      login: 'admin',
+      password: '$2b$10$vZsjLv8pgin3zc8Pa5p5r.xnpZXmgHWOUOkOSZQNo6VJP7tEro5FW', //hashed password "admin"
+      role: UserRole.ADMIN,
     },
   });
 

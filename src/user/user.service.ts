@@ -27,12 +27,9 @@ export class UserService {
     return user;
   }
 
-  async getUserByCredentials(login: string, password: string): Promise<User> {
+  async getUserByCredentials(where): Promise<User> {
     const user = await dbClient.user.findUnique({
-      where: {
-        login,
-        password,
-      },
+      where,
     });
 
     if (!user) {

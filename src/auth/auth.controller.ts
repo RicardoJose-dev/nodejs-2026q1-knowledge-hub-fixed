@@ -35,14 +35,14 @@ export class AuthController {
     const { login, password } = body;
     const hashedPassword = await this.authService.hashValue(password);
 
-    const user = await this.userService.getUserByCredentials(
+    const user = await this.userService.getUserByCredentials({
       login,
-      hashedPassword,
-    );
+      password: hashedPassword,
+    });
 
     return {
       accessToken: this.authService.getAccessToken(user),
-      refreshToken: this.authService.getAccessToken(user),
+      refreshToken: this.authService.getRefreshToken(user),
     };
   }
 
@@ -53,13 +53,16 @@ export class AuthController {
     @Body() body: RefreshBody,
   ): Promise<{ accessToken: string; refreshToken: string }> {
     const { refreshToken } = body;
-    const { login, password } = this.authService.verifyToken(refreshToken);
+    const { login, userId } = this.authService.verifyToken(refreshToken);
 
-    const user = await this.userService.getUserByCredentials(login, password);
+    const user = await this.userService.getUserByCredentials({
+      id: userId,
+      login,
+    });
 
     return {
       accessToken: this.authService.getAccessToken(user),
-      refreshToken: this.authService.getAccessToken(user),
+      refreshToken: this.authService.getRefreshToken(user),
     };
   }
 }
