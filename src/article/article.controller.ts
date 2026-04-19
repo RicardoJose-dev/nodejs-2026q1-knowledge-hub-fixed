@@ -9,13 +9,16 @@ import {
   Param,
   Body,
   ParseUUIDPipe,
+  UseGuards,
 } from '@nestjs/common';
 import { ApiOperation } from '@nestjs/swagger';
+import { Article } from 'src/db/prisma/client/client';
 import { UserService } from 'src/user/user.service';
 import { ArticleService } from './article.service';
 import { CategoryService } from 'src/category/category.service';
+import { RolesGuard, TokenGuard } from 'src/common/guards';
+import { AdminAuth, EditorAuth, ViewerAuth } from 'src/common/decorators';
 import { ArticleQueryDto, CreateArticleDto, UpdateArticleDto } from './dto';
-import { Article } from 'src/db/prisma/client/client';
 
 @Controller('article')
 export class ArticleController {
@@ -26,6 +29,8 @@ export class ArticleController {
   ) {}
 
   @Get()
+  @UseGuards(TokenGuard, RolesGuard)
+  @ViewerAuth()
   @ApiOperation({ summary: 'Get all articles' })
   @HttpCode(200)
   getArticles(@Query() query: ArticleQueryDto): Promise<Article[]> {
@@ -33,6 +38,8 @@ export class ArticleController {
   }
 
   @Get(':id')
+  @UseGuards(TokenGuard, RolesGuard)
+  @ViewerAuth()
   @ApiOperation({ summary: 'Get articles by id' })
   @HttpCode(200)
   getArticleById(
@@ -42,6 +49,8 @@ export class ArticleController {
   }
 
   @Post()
+  @UseGuards(TokenGuard, RolesGuard)
+  @EditorAuth()
   @ApiOperation({ summary: 'Create article' })
   @HttpCode(201)
   async createArticle(@Body() body: CreateArticleDto): Promise<Article> {
@@ -59,6 +68,8 @@ export class ArticleController {
   }
 
   @Put(':id')
+  @UseGuards(TokenGuard, RolesGuard)
+  @EditorAuth()
   @ApiOperation({ summary: 'Update article' })
   @HttpCode(200)
   async updateArticle(
@@ -76,6 +87,8 @@ export class ArticleController {
   }
 
   @Delete(':id')
+  @UseGuards(TokenGuard, RolesGuard)
+  @AdminAuth()
   @ApiOperation({ summary: 'Delete article' })
   @HttpCode(204)
   async deleteArticle(@Param('id', new ParseUUIDPipe()) id: string) {

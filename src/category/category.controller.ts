@@ -8,17 +8,22 @@ import {
   Param,
   Body,
   ParseUUIDPipe,
+  UseGuards,
 } from '@nestjs/common';
 import { ApiOperation } from '@nestjs/swagger';
+import { Category } from 'src/db/prisma/client/client';
+import { RolesGuard, TokenGuard } from 'src/common/guards';
+import { AdminAuth, EditorAuth, ViewerAuth } from 'src/common/decorators';
 import { CategoryService } from './category.service';
 import { CreateCategoryDto, UpdateCategorydDto } from './dto';
-import { Category } from 'src/db/prisma/client/client';
 
 @Controller('category')
 export class CategoryController {
   constructor(private readonly categoryService: CategoryService) {}
 
   @Get()
+  @UseGuards(TokenGuard, RolesGuard)
+  @ViewerAuth()
   @ApiOperation({ summary: 'Get all categories' })
   @HttpCode(200)
   getCategories(): Promise<Category[]> {
@@ -26,6 +31,8 @@ export class CategoryController {
   }
 
   @Get(':id')
+  @UseGuards(TokenGuard, RolesGuard)
+  @ViewerAuth()
   @ApiOperation({ summary: 'Get category by id' })
   @HttpCode(200)
   getCategoryById(
@@ -35,6 +42,8 @@ export class CategoryController {
   }
 
   @Post()
+  @UseGuards(TokenGuard, RolesGuard)
+  @EditorAuth()
   @ApiOperation({ summary: 'Create category' })
   @HttpCode(201)
   createCategory(@Body() body: CreateCategoryDto): Promise<Category> {
@@ -42,6 +51,8 @@ export class CategoryController {
   }
 
   @Put(':id')
+  @UseGuards(TokenGuard, RolesGuard)
+  @EditorAuth()
   @ApiOperation({ summary: 'Update category' })
   @HttpCode(200)
   async updateCategory(
@@ -53,6 +64,8 @@ export class CategoryController {
   }
 
   @Delete(':id')
+  @UseGuards(TokenGuard, RolesGuard)
+  @AdminAuth()
   @ApiOperation({ summary: 'Delete category' })
   @HttpCode(204)
   async deleteCategory(@Param('id', new ParseUUIDPipe()) id: string) {

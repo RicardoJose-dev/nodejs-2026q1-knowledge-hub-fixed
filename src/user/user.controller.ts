@@ -8,9 +8,12 @@ import {
   Param,
   Body,
   ParseUUIDPipe,
+  UseGuards,
 } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
 import { ApiOperation } from '@nestjs/swagger';
+import { RolesGuard, TokenGuard } from 'src/common/guards';
+import { AdminAuth, EditorAuth, ViewerAuth } from 'src/common/decorators';
 import { UserService } from './user.service';
 import { CreateUserDto, UpdatePasswordDto, UserResponseDto } from './dto';
 
@@ -19,6 +22,8 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Get()
+  @UseGuards(TokenGuard, RolesGuard)
+  @ViewerAuth()
   @ApiOperation({ summary: 'Get all users' })
   @HttpCode(200)
   async getUsers(): Promise<UserResponseDto[]> {
@@ -27,6 +32,8 @@ export class UserController {
   }
 
   @Get(':userId')
+  @UseGuards(TokenGuard, RolesGuard)
+  @ViewerAuth()
   @ApiOperation({ summary: 'Get user by id' })
   @HttpCode(200)
   async getUserById(
@@ -37,6 +44,8 @@ export class UserController {
   }
 
   @Post()
+  @UseGuards(TokenGuard, RolesGuard)
+  @EditorAuth()
   @ApiOperation({ summary: 'Create user' })
   @HttpCode(201)
   async createUser(@Body() body: CreateUserDto): Promise<UserResponseDto> {
@@ -45,6 +54,8 @@ export class UserController {
   }
 
   @Put(':userId')
+  @UseGuards(TokenGuard, RolesGuard)
+  @EditorAuth()
   @ApiOperation({ summary: 'update user' })
   @HttpCode(200)
   async updateUser(
@@ -58,6 +69,8 @@ export class UserController {
   }
 
   @Delete(':userId')
+  @UseGuards(TokenGuard, RolesGuard)
+  @AdminAuth()
   @ApiOperation({ summary: 'Delete user' })
   @HttpCode(204)
   async deleteUser(@Param('userId', new ParseUUIDPipe()) userId: string) {

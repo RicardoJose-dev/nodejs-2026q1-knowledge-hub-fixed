@@ -8,14 +8,17 @@ import {
   Param,
   Body,
   ParseUUIDPipe,
+  UseGuards,
 } from '@nestjs/common';
 import { ApiOperation } from '@nestjs/swagger';
+import { Comment } from 'src/db/prisma/client/client';
+import { RolesGuard, TokenGuard } from 'src/common/guards';
+import { AdminAuth, EditorAuth, ViewerAuth } from 'src/common/decorators';
 import { CommentService } from './comment.service';
 import { UserService } from 'src/user/user.service';
 import { ArticleService } from 'src/article/article.service';
 import { UnprocessableContentException } from 'src/exception';
 import { CreateCommentDto, CommentQueryDto } from './dto';
-import { Comment } from 'src/db/prisma/client/client';
 
 @Controller('comment')
 export class CommentController {
@@ -26,6 +29,8 @@ export class CommentController {
   ) {}
 
   @Get()
+  @UseGuards(TokenGuard, RolesGuard)
+  @ViewerAuth()
   @ApiOperation({ summary: 'Get comments by article id' })
   @HttpCode(200)
   getArticleComments(@Query() query: CommentQueryDto): Promise<Comment[]> {
@@ -34,6 +39,8 @@ export class CommentController {
   }
 
   @Post()
+  @UseGuards(TokenGuard, RolesGuard)
+  @EditorAuth()
   @ApiOperation({ summary: 'Create comment' })
   @HttpCode(201)
   async createComment(@Body() body: CreateCommentDto): Promise<Comment> {
@@ -54,6 +61,8 @@ export class CommentController {
   }
 
   @Delete(':id')
+  @UseGuards(TokenGuard, RolesGuard)
+  @AdminAuth()
   @ApiOperation({ summary: 'Delete comment' })
   @HttpCode(204)
   async deleteComment(@Param('id', new ParseUUIDPipe()) id: string) {
