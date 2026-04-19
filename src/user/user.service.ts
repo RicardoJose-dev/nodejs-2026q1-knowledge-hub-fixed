@@ -27,6 +27,21 @@ export class UserService {
     return user;
   }
 
+  async getUserByCredentials(login: string, password: string): Promise<User> {
+    const user = await dbClient.user.findUnique({
+      where: {
+        login,
+        password,
+      },
+    });
+
+    if (!user) {
+      throw new ForbiddenException('Authentication failed');
+    }
+
+    return user;
+  }
+
   async createUser(body: CreateUserDto): Promise<User> {
     const { login, password, role = UserRole.VIEWER } = body;
 
