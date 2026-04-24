@@ -8,17 +8,19 @@ import {
   Param,
   Body,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
-import { plainToInstance } from 'class-transformer';
 import { ApiOperation } from '@nestjs/swagger';
 import { CustomParseUUIDPipe } from 'src/common/pipes/CustomParseUUIDPipe';
 import { RolesGuard, TokenGuard } from 'src/common/guards';
 import { AdminAuth, EditorAuth, ViewerAuth } from 'src/common/decorators';
+import { TransformInterceptor } from 'src/common/interceptors/TransformInterceptor';
 import { CommentService } from './comment.service';
 import { UserService } from 'src/user/user.service';
 import { ArticleService } from 'src/article/article.service';
 import { UnprocessableContentException } from 'src/exception';
 import { CreateCommentDto, CommentQueryDto, CommentResponseDto } from './dto';
+import { Comment } from 'src/db/prisma/client/client';
 
 @Controller('comment')
 export class CommentController {
@@ -33,11 +35,11 @@ export class CommentController {
   @ViewerAuth()
   @ApiOperation({ summary: 'Get comments by id' })
   @HttpCode(200)
+  @UseInterceptors(new TransformInterceptor(CommentResponseDto))
   async getCommentById(
     @Param('commentId', new CustomParseUUIDPipe()) commentId: string,
-  ): Promise<CommentResponseDto> {
-    const comments = await this.commentService.getCommentById(commentId);
-    return plainToInstance(CommentResponseDto, comments);
+  ): Promise<Comment> {
+    return await this.commentService.getCommentById(commentId);
   }
 
   @Get()
@@ -45,12 +47,12 @@ export class CommentController {
   @ViewerAuth()
   @ApiOperation({ summary: 'Get comments by article id' })
   @HttpCode(200)
+  @UseInterceptors(new TransformInterceptor(CommentResponseDto))
   async getArticleComments(
     @Query() query: CommentQueryDto,
-  ): Promise<CommentResponseDto[]> {
+  ): Promise<Comment[]> {
     const { articleId } = query;
-    const comments = await this.commentService.getArticleComments(articleId);
-    return plainToInstance(CommentResponseDto, comments);
+    return await this.commentService.getArticleComments(articleId);
   }
 
   @Post()
@@ -58,9 +60,8 @@ export class CommentController {
   @EditorAuth()
   @ApiOperation({ summary: 'Create comment' })
   @HttpCode(201)
-  async createComment(
-    @Body() body: CreateCommentDto,
-  ): Promise<CommentResponseDto> {
+  @UseInterceptors(new TransformInterceptor(CommentResponseDto))
+  async createComment(@Body() body: CreateCommentDto): Promise<Comment> {
     const { authorId, articleId } = body;
 
     if (authorId) {
@@ -74,8 +75,7 @@ export class CommentController {
       );
     }
 
-    const comment = await this.commentService.createComment(body);
-    return plainToInstance(CommentResponseDto, comment);
+    return await this.commentService.createComment(body);
   }
 
   @Delete(':id')
