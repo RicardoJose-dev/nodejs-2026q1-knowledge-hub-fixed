@@ -30,8 +30,10 @@ export class AuthService {
   }
 
   verifyRefreshToken(token: string): TokenPayload {
+    const secret = process.env.JWT_REFRESH_SECRET;
+
     try {
-      return jwt.verify(token, process.env.JWT_REFRESH_SECRET, {
+      return jwt.verify(token, secret, {
         algorithms: ['HS256'],
       }) as TokenPayload;
     } catch (err) {
