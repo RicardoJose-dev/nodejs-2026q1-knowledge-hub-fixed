@@ -7,11 +7,11 @@ import {
   HttpCode,
   Param,
   Body,
-  ParseUUIDPipe,
   UseGuards,
 } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
 import { ApiOperation } from '@nestjs/swagger';
+import { CustomParseUUIDPipe } from 'src/common/pipes/CustomParseUUIDPipe';
 import { RolesGuard, TokenGuard } from 'src/common/guards';
 import { AdminAuth, EditorAuth, ViewerAuth } from 'src/common/decorators';
 import { UserService } from './user.service';
@@ -37,7 +37,7 @@ export class UserController {
   @ApiOperation({ summary: 'Get user by id' })
   @HttpCode(200)
   async getUserById(
-    @Param('userId', new ParseUUIDPipe()) userId: string,
+    @Param('userId', new CustomParseUUIDPipe()) userId: string,
   ): Promise<UserResponseDto> {
     const user = await this.userService.getUserById(userId);
     return plainToInstance(UserResponseDto, user);
@@ -59,7 +59,7 @@ export class UserController {
   @ApiOperation({ summary: 'update user' })
   @HttpCode(200)
   async updateUser(
-    @Param('userId', new ParseUUIDPipe()) userId: string,
+    @Param('userId', new CustomParseUUIDPipe()) userId: string,
     @Body() body: UpdatePasswordDto,
   ): Promise<UserResponseDto> {
     const user = await this.userService.getUserById(userId);
@@ -73,7 +73,7 @@ export class UserController {
   @AdminAuth()
   @ApiOperation({ summary: 'Delete user' })
   @HttpCode(204)
-  async deleteUser(@Param('userId', new ParseUUIDPipe()) userId: string) {
+  async deleteUser(@Param('userId', new CustomParseUUIDPipe()) userId: string) {
     const user = await this.userService.getUserById(userId);
     await this.userService.deleteUser(user);
   }

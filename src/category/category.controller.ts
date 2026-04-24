@@ -7,10 +7,10 @@ import {
   HttpCode,
   Param,
   Body,
-  ParseUUIDPipe,
   UseGuards,
 } from '@nestjs/common';
 import { ApiOperation } from '@nestjs/swagger';
+import { CustomParseUUIDPipe } from 'src/common/pipes/CustomParseUUIDPipe';
 import { Category } from 'src/db/prisma/client/client';
 import { RolesGuard, TokenGuard } from 'src/common/guards';
 import { AdminAuth, ViewerAuth } from 'src/common/decorators';
@@ -36,7 +36,7 @@ export class CategoryController {
   @ApiOperation({ summary: 'Get category by id' })
   @HttpCode(200)
   getCategoryById(
-    @Param('id', new ParseUUIDPipe()) id: string,
+    @Param('id', new CustomParseUUIDPipe()) id: string,
   ): Promise<Category> {
     return this.categoryService.getCategoryById(id);
   }
@@ -56,7 +56,7 @@ export class CategoryController {
   @ApiOperation({ summary: 'Update category' })
   @HttpCode(200)
   async updateCategory(
-    @Param('id', new ParseUUIDPipe()) id: string,
+    @Param('id', new CustomParseUUIDPipe()) id: string,
     @Body() body: UpdateCategorydDto,
   ): Promise<Category> {
     const category = await this.categoryService.getCategoryById(id);
@@ -68,7 +68,7 @@ export class CategoryController {
   @AdminAuth()
   @ApiOperation({ summary: 'Delete category' })
   @HttpCode(204)
-  async deleteCategory(@Param('id', new ParseUUIDPipe()) id: string) {
+  async deleteCategory(@Param('id', new CustomParseUUIDPipe()) id: string) {
     const category = await this.categoryService.getCategoryById(id);
     await this.categoryService.deleteCategory(category);
   }

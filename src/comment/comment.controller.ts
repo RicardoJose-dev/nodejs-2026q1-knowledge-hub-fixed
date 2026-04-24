@@ -7,11 +7,11 @@ import {
   HttpCode,
   Param,
   Body,
-  ParseUUIDPipe,
   UseGuards,
 } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
 import { ApiOperation } from '@nestjs/swagger';
+import { CustomParseUUIDPipe } from 'src/common/pipes/CustomParseUUIDPipe';
 import { RolesGuard, TokenGuard } from 'src/common/guards';
 import { AdminAuth, EditorAuth, ViewerAuth } from 'src/common/decorators';
 import { CommentService } from './comment.service';
@@ -34,7 +34,7 @@ export class CommentController {
   @ApiOperation({ summary: 'Get comments by id' })
   @HttpCode(200)
   async getCommentById(
-    @Param('commentId', new ParseUUIDPipe()) commentId: string,
+    @Param('commentId', new CustomParseUUIDPipe()) commentId: string,
   ): Promise<CommentResponseDto> {
     const comments = await this.commentService.getCommentById(commentId);
     return plainToInstance(CommentResponseDto, comments);
@@ -83,7 +83,7 @@ export class CommentController {
   @AdminAuth()
   @ApiOperation({ summary: 'Delete comment' })
   @HttpCode(204)
-  async deleteComment(@Param('id', new ParseUUIDPipe()) id: string) {
+  async deleteComment(@Param('id', new CustomParseUUIDPipe()) id: string) {
     const comment = await this.commentService.getCommentById(id);
     await this.commentService.deleteComment(comment);
   }

@@ -8,11 +8,11 @@ import {
   HttpCode,
   Param,
   Body,
-  ParseUUIDPipe,
   UseGuards,
 } from '@nestjs/common';
 import { ApiOperation } from '@nestjs/swagger';
 import { plainToInstance } from 'class-transformer';
+import { CustomParseUUIDPipe } from 'src/common/pipes/CustomParseUUIDPipe';
 import { UserService } from 'src/user/user.service';
 import { ArticleService } from './article.service';
 import { CategoryService } from 'src/category/category.service';
@@ -51,7 +51,7 @@ export class ArticleController {
   @ApiOperation({ summary: 'Get articles by id' })
   @HttpCode(200)
   async getArticleById(
-    @Param('id', new ParseUUIDPipe()) id: string,
+    @Param('id', new CustomParseUUIDPipe()) id: string,
   ): Promise<ArticleResponseDto> {
     const article = await this.articleService.getArticleById(id);
     return plainToInstance(ArticleResponseDto, article);
@@ -85,7 +85,7 @@ export class ArticleController {
   @ApiOperation({ summary: 'Update article' })
   @HttpCode(200)
   async updateArticle(
-    @Param('id', new ParseUUIDPipe()) id: string,
+    @Param('id', new CustomParseUUIDPipe()) id: string,
     @Body() body: UpdateArticleDto,
   ): Promise<ArticleResponseDto> {
     const { categoryId } = body;
@@ -108,7 +108,7 @@ export class ArticleController {
   @AdminAuth()
   @ApiOperation({ summary: 'Delete article' })
   @HttpCode(204)
-  async deleteArticle(@Param('id', new ParseUUIDPipe()) id: string) {
+  async deleteArticle(@Param('id', new CustomParseUUIDPipe()) id: string) {
     const article = await this.articleService.getArticleById(id);
     await this.articleService.deleteArticle(article);
   }
