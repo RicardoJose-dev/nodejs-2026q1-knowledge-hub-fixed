@@ -14,15 +14,17 @@ export class AuthController {
   @Post('signup')
   @ApiOperation({ summary: 'Signup user' })
   @HttpCode(201)
-  async signup(@Body() body: SignupBody): Promise<{ message: string }> {
+  async signup(
+    @Body() body: SignupBody,
+  ): Promise<{ message: string; id: string }> {
     const { login, password } = body;
 
-    await this.userService.createUser({
+    const user = await this.userService.createUser({
       login,
       password,
     });
 
-    return { message: 'user successfully created' };
+    return { message: 'user successfully created', id: user.id };
   }
 
   @Post('login')
