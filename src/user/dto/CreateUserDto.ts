@@ -15,7 +15,7 @@ export class CreateUserDto {
 
   @IsString()
   @ApiProperty({ required: false })
-  @IsIn([UserRole.ADMIN, UserRole.EDITOR, UserRole.VIEWER])
+  @IsIn([UserRole.admin, UserRole.editor, UserRole.viewer])
   @IsOptional()
   role?: UserRole;
 }

@@ -1,4 +1,5 @@
 import { SetMetadata } from '@nestjs/common';
 import { UserRole } from 'src/db/prisma/client/client';
 
-export const EditorAuth = () => SetMetadata('roles', [UserRole.ADMIN, UserRole.EDITOR]);
+export const EditorAuth = () =>
+  SetMetadata('roles', [UserRole.admin, UserRole.editor]);

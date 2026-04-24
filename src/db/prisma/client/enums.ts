@@ -9,18 +9,18 @@
 */
 
 export const UserRole = {
-  ADMIN: 'ADMIN',
-  EDITOR: 'EDITOR',
-  VIEWER: 'VIEWER'
+  admin: 'admin',
+  editor: 'editor',
+  viewer: 'viewer'
 } as const
 
 export type UserRole = (typeof UserRole)[keyof typeof UserRole]
 
 
 export const ArticleStatus = {
-  DRAFT: 'DRAFT',
-  PUBLISHED: 'PUBLISHED',
-  ARCHIVED: 'ARCHIVED'
+  draft: 'draft',
+  published: 'published',
+  archived: 'archived'
 } as const
 
 export type ArticleStatus = (typeof ArticleStatus)[keyof typeof ArticleStatus]

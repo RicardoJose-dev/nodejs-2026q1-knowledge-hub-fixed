@@ -6,7 +6,7 @@ async function main() {
     data: {
       login: 'admin',
       password: '$2b$10$vZsjLv8pgin3zc8Pa5p5r.xnpZXmgHWOUOkOSZQNo6VJP7tEro5FW', //hashed password "admin"
-      role: UserRole.ADMIN,
+      role: UserRole.admin,
     },
   });
 
@@ -14,7 +14,7 @@ async function main() {
     data: {
       login: 'user2',
       password: 'user2pas',
-      role: UserRole.EDITOR,
+      role: UserRole.admin,
     },
   });
 
@@ -48,9 +48,9 @@ async function main() {
         title: `Sample Article ${i + 1}`,
         content: `This is the content for article ${i + 1}.`,
         status: [
-          ArticleStatus.DRAFT,
-          ArticleStatus.PUBLISHED,
-          ArticleStatus.ARCHIVED,
+          ArticleStatus.draft,
+          ArticleStatus.published,
+          ArticleStatus.archived,
         ][i % 3],
         author: { connect: { id: i % 2 === 0 ? user1.id : user2.id } },
         category: {

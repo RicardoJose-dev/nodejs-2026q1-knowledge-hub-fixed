@@ -1,6 +1,6 @@
 import 'dotenv/config';
 import * as bcrypt from 'bcrypt';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, UserRole } from '../../src/db/prisma/client/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 
 export const SEED_ADMIN_LOGIN = 'TEST_SEED_ADMIN';
@@ -8,7 +8,9 @@ export const SEED_ADMIN_PASSWORD = 'TestSeedAdmin123!';
 
 export default async function globalSetup(): Promise<void> {
   const prisma = new PrismaClient({
-    adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL })
+    adapter: new PrismaPg({
+      connectionString: process.env.DATABASE_URL_FROM_OUTSIDE_CONTAINERS,
+    }),
   });
   const hashedPassword = await bcrypt.hash(SEED_ADMIN_PASSWORD, 10);
 

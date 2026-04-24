@@ -48,7 +48,7 @@ export class ArticleService {
     return dbClient.article.create({
       data: {
         ...body,
-        status: body.status ?? ArticleStatus.DRAFT,
+        status: body.status ?? ArticleStatus.draft,
         authorId: body.authorId ?? null,
         categoryId: body.categoryId ?? null,
         tags: {

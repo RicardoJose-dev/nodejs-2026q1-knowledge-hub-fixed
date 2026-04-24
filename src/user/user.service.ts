@@ -45,7 +45,7 @@ export class UserService {
   }
 
   async createUser(body: CreateUserDto): Promise<User> {
-    const { login, password, role = UserRole.VIEWER } = body;
+    const { login, password, role = UserRole.viewer } = body;
     const hashedPassword = await this.hashValue(password);
 
     const newUser = await dbClient.user.create({
