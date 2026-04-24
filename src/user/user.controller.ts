@@ -45,7 +45,7 @@ export class UserController {
 
   @Post()
   @UseGuards(TokenGuard, RolesGuard)
-  @EditorAuth()
+  @AdminAuth()
   @ApiOperation({ summary: 'Create user' })
   @HttpCode(201)
   async createUser(@Body() body: CreateUserDto): Promise<UserResponseDto> {

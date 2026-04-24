@@ -13,7 +13,7 @@ import {
 import { ApiOperation } from '@nestjs/swagger';
 import { Category } from 'src/db/prisma/client/client';
 import { RolesGuard, TokenGuard } from 'src/common/guards';
-import { AdminAuth, EditorAuth, ViewerAuth } from 'src/common/decorators';
+import { AdminAuth, ViewerAuth } from 'src/common/decorators';
 import { CategoryService } from './category.service';
 import { CreateCategoryDto, UpdateCategorydDto } from './dto';
 
@@ -43,7 +43,7 @@ export class CategoryController {
 
   @Post()
   @UseGuards(TokenGuard, RolesGuard)
-  @EditorAuth()
+  @AdminAuth()
   @ApiOperation({ summary: 'Create category' })
   @HttpCode(201)
   async createCategory(@Body() body: CreateCategoryDto): Promise<Category> {
@@ -52,7 +52,7 @@ export class CategoryController {
 
   @Put(':id')
   @UseGuards(TokenGuard, RolesGuard)
-  @EditorAuth()
+  @AdminAuth()
   @ApiOperation({ summary: 'Update category' })
   @HttpCode(200)
   async updateCategory(
