@@ -1,6 +1,6 @@
 import 'dotenv/config';
 import * as bcrypt from 'bcrypt';
-import { PrismaClient, UserRole } from '../../src/db/prisma/client/client';
+import { PrismaClient } from '../../src/db/prisma/client/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 
 export const SEED_ADMIN_LOGIN = 'TEST_SEED_ADMIN';
