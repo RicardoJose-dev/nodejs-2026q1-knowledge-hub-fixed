@@ -63,7 +63,9 @@ export class UserService {
     const { newPassword, oldPassword } = body;
     const { password: currentPasswrod } = user;
 
-    if (currentPasswrod !== oldPassword) {
+    const hashedOldPassword = await this.hashValue(oldPassword);
+
+    if (currentPasswrod !== hashedOldPassword) {
       throw new ForbiddenException('old password does not match');
     }
 

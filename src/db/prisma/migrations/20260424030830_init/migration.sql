@@ -73,9 +73,6 @@ CREATE UNIQUE INDEX "User_login_key" ON "User"("login");
 CREATE UNIQUE INDEX "Tag_name_key" ON "Tag"("name");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Category_name_key" ON "Category"("name");
-
--- CreateIndex
 CREATE INDEX "_ArticleToTag_B_index" ON "_ArticleToTag"("B");
 
 -- AddForeignKey

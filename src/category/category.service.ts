@@ -52,7 +52,7 @@ export class CategoryService {
     return updateCategory;
   }
 
-  deleteCategory(category: Category) {
-    dbClient.category.delete({ where: { id: category.id } });
+  async deleteCategory(category: Category) {
+    await dbClient.category.delete({ where: { id: category.id } });
   }
 }

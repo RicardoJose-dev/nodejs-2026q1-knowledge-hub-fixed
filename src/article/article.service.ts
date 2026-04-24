@@ -5,10 +5,10 @@ import { Article, ArticleStatus } from 'src/db/prisma/client/client';
 
 @Injectable()
 export class ArticleService {
-  getArticles(query: ArticleQueryDto): Promise<Article[]> {
+  async getArticles(query: ArticleQueryDto): Promise<Article[]> {
     const { status, categoryId, tag } = query;
 
-    return dbClient.article.findMany({
+    return await dbClient.article.findMany({
       where: {
         ...(status && { status }),
         ...(categoryId && { categoryId }),
@@ -35,6 +35,9 @@ export class ArticleService {
       where: {
         id: articleId,
       },
+      include: {
+        tags: true,
+      },
     });
 
     if (!article) {
@@ -44,8 +47,8 @@ export class ArticleService {
     return article;
   }
 
-  createArticle(body: CreateArticleDto): Promise<Article> {
-    return dbClient.article.create({
+  async createArticle(body: CreateArticleDto): Promise<Article> {
+    return await dbClient.article.create({
       data: {
         ...body,
         status: body.status ?? ArticleStatus.draft,
@@ -58,11 +61,17 @@ export class ArticleService {
           })),
         },
       },
+      include: {
+        tags: true,
+      },
     });
   }
 
-  updateArticle(article: Article, body: UpdateArticleDto): Promise<Article> {
-    return dbClient.article.update({
+  async updateArticle(
+    article: Article,
+    body: UpdateArticleDto,
+  ): Promise<Article> {
+    return await dbClient.article.update({
       where: { id: article.id },
       data: {
         ...body,
@@ -74,11 +83,14 @@ export class ArticleService {
           })),
         },
       },
+      include: {
+        tags: true,
+      },
     });
   }
 
-  deleteArticle(article: Article) {
-    dbClient.article.delete({
+  async deleteArticle(article: Article) {
+    await dbClient.article.delete({
       where: {
         id: article.id,
       },

@@ -44,7 +44,7 @@ model Tag {
 
 model Category {
   id       String    @id @default(uuid())
-  name     String    @unique
+  name     String
   description String
   articles Article[]
 }

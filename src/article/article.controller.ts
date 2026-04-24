@@ -12,13 +12,18 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiOperation } from '@nestjs/swagger';
-import { Article } from 'src/db/prisma/client/client';
+import { plainToInstance } from 'class-transformer';
 import { UserService } from 'src/user/user.service';
 import { ArticleService } from './article.service';
 import { CategoryService } from 'src/category/category.service';
 import { RolesGuard, TokenGuard } from 'src/common/guards';
 import { AdminAuth, EditorAuth, ViewerAuth } from 'src/common/decorators';
-import { ArticleQueryDto, CreateArticleDto, UpdateArticleDto } from './dto';
+import {
+  ArticleQueryDto,
+  CreateArticleDto,
+  UpdateArticleDto,
+  ArticleResponseDto,
+} from './dto';
 
 @Controller('article')
 export class ArticleController {
@@ -33,8 +38,11 @@ export class ArticleController {
   @ViewerAuth()
   @ApiOperation({ summary: 'Get all articles' })
   @HttpCode(200)
-  getArticles(@Query() query: ArticleQueryDto): Promise<Article[]> {
-    return this.articleService.getArticles(query);
+  async getArticles(
+    @Query() query: ArticleQueryDto,
+  ): Promise<ArticleResponseDto[]> {
+    const articles = await this.articleService.getArticles(query);
+    return plainToInstance(ArticleResponseDto, articles);
   }
 
   @Get(':id')
@@ -42,10 +50,11 @@ export class ArticleController {
   @ViewerAuth()
   @ApiOperation({ summary: 'Get articles by id' })
   @HttpCode(200)
-  getArticleById(
+  async getArticleById(
     @Param('id', new ParseUUIDPipe()) id: string,
-  ): Promise<Article> {
-    return this.articleService.getArticleById(id);
+  ): Promise<ArticleResponseDto> {
+    const article = await this.articleService.getArticleById(id);
+    return plainToInstance(ArticleResponseDto, article);
   }
 
   @Post()
@@ -53,7 +62,9 @@ export class ArticleController {
   @EditorAuth()
   @ApiOperation({ summary: 'Create article' })
   @HttpCode(201)
-  async createArticle(@Body() body: CreateArticleDto): Promise<Article> {
+  async createArticle(
+    @Body() body: CreateArticleDto,
+  ): Promise<ArticleResponseDto> {
     const { authorId, categoryId } = body;
 
     if (authorId) {
@@ -64,7 +75,8 @@ export class ArticleController {
       await this.catergoryService.getCategoryById(categoryId);
     }
 
-    return this.articleService.createArticle(body);
+    const article = await this.articleService.createArticle(body);
+    return plainToInstance(ArticleResponseDto, article);
   }
 
   @Put(':id')
@@ -75,7 +87,7 @@ export class ArticleController {
   async updateArticle(
     @Param('id', new ParseUUIDPipe()) id: string,
     @Body() body: UpdateArticleDto,
-  ): Promise<Article> {
+  ): Promise<ArticleResponseDto> {
     const { categoryId } = body;
 
     if (categoryId) {
@@ -83,7 +95,12 @@ export class ArticleController {
     }
 
     const article = await this.articleService.getArticleById(id);
-    return this.articleService.updateArticle(article, body);
+    const updatedArticle = await this.articleService.updateArticle(
+      article,
+      body,
+    );
+
+    return plainToInstance(ArticleResponseDto, updatedArticle);
   }
 
   @Delete(':id')
@@ -93,6 +110,6 @@ export class ArticleController {
   @HttpCode(204)
   async deleteArticle(@Param('id', new ParseUUIDPipe()) id: string) {
     const article = await this.articleService.getArticleById(id);
-    this.articleService.deleteArticle(article);
+    await this.articleService.deleteArticle(article);
   }
 }

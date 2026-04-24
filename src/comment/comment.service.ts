@@ -34,8 +34,8 @@ export class CommentService {
     });
   }
 
-  deleteComment(comment: Comment) {
-    dbClient.comment.delete({
+  async deleteComment(comment: Comment) {
+    await dbClient.comment.delete({
       where: {
         id: comment.id,
       },

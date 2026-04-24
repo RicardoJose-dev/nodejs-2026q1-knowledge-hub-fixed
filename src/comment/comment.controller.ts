@@ -10,15 +10,15 @@ import {
   ParseUUIDPipe,
   UseGuards,
 } from '@nestjs/common';
+import { plainToInstance } from 'class-transformer';
 import { ApiOperation } from '@nestjs/swagger';
-import { Comment } from 'src/db/prisma/client/client';
 import { RolesGuard, TokenGuard } from 'src/common/guards';
 import { AdminAuth, EditorAuth, ViewerAuth } from 'src/common/decorators';
 import { CommentService } from './comment.service';
 import { UserService } from 'src/user/user.service';
 import { ArticleService } from 'src/article/article.service';
 import { UnprocessableContentException } from 'src/exception';
-import { CreateCommentDto, CommentQueryDto } from './dto';
+import { CreateCommentDto, CommentQueryDto, CommentResponseDto } from './dto';
 
 @Controller('comment')
 export class CommentController {
@@ -28,14 +28,29 @@ export class CommentController {
     private readonly articleService: ArticleService,
   ) {}
 
+  @Get(':commentId')
+  @UseGuards(TokenGuard, RolesGuard)
+  @ViewerAuth()
+  @ApiOperation({ summary: 'Get comments by id' })
+  @HttpCode(200)
+  async getCommentById(
+    @Param('commentId', new ParseUUIDPipe()) commentId: string,
+  ): Promise<CommentResponseDto> {
+    const comments = await this.commentService.getCommentById(commentId);
+    return plainToInstance(CommentResponseDto, comments);
+  }
+
   @Get()
   @UseGuards(TokenGuard, RolesGuard)
   @ViewerAuth()
   @ApiOperation({ summary: 'Get comments by article id' })
   @HttpCode(200)
-  getArticleComments(@Query() query: CommentQueryDto): Promise<Comment[]> {
+  async getArticleComments(
+    @Query() query: CommentQueryDto,
+  ): Promise<CommentResponseDto[]> {
     const { articleId } = query;
-    return this.commentService.getArticleComments(articleId);
+    const comments = await this.commentService.getArticleComments(articleId);
+    return plainToInstance(CommentResponseDto, comments);
   }
 
   @Post()
@@ -43,7 +58,9 @@ export class CommentController {
   @EditorAuth()
   @ApiOperation({ summary: 'Create comment' })
   @HttpCode(201)
-  async createComment(@Body() body: CreateCommentDto): Promise<Comment> {
+  async createComment(
+    @Body() body: CreateCommentDto,
+  ): Promise<CommentResponseDto> {
     const { authorId, articleId } = body;
 
     if (authorId) {
@@ -57,7 +74,8 @@ export class CommentController {
       );
     }
 
-    return this.commentService.createComment(body);
+    const comment = await this.commentService.createComment(body);
+    return plainToInstance(CommentResponseDto, comment);
   }
 
   @Delete(':id')
@@ -67,6 +85,6 @@ export class CommentController {
   @HttpCode(204)
   async deleteComment(@Param('id', new ParseUUIDPipe()) id: string) {
     const comment = await this.commentService.getCommentById(id);
-    this.commentService.deleteComment(comment);
+    await this.commentService.deleteComment(comment);
   }
 }

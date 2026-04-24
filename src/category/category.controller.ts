@@ -46,8 +46,8 @@ export class CategoryController {
   @EditorAuth()
   @ApiOperation({ summary: 'Create category' })
   @HttpCode(201)
-  createCategory(@Body() body: CreateCategoryDto): Promise<Category> {
-    return this.categoryService.createCategory(body);
+  async createCategory(@Body() body: CreateCategoryDto): Promise<Category> {
+    return await this.categoryService.createCategory(body);
   }
 
   @Put(':id')
@@ -70,6 +70,6 @@ export class CategoryController {
   @HttpCode(204)
   async deleteCategory(@Param('id', new ParseUUIDPipe()) id: string) {
     const category = await this.categoryService.getCategoryById(id);
-    this.categoryService.deleteCategory(category);
+    await this.categoryService.deleteCategory(category);
   }
 }
