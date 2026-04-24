@@ -46,8 +46,8 @@ export class CategoryController {
   @AdminAuth()
   @ApiOperation({ summary: 'Create category' })
   @HttpCode(201)
-  async createCategory(@Body() body: CreateCategoryDto): Promise<Category> {
-    return await this.categoryService.createCategory(body);
+  createCategory(@Body() body: CreateCategoryDto): Promise<Category> {
+    return this.categoryService.createCategory(body);
   }
 
   @Put(':id')

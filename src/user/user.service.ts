@@ -40,8 +40,8 @@ export class UserService {
     return user;
   }
 
-  async hashValue(value: string) {
-    return await bcrypt.hash(value, '$2b$10$vZsjLv8pgin3zc8Pa5p5r.');
+  hashValue(value: string) {
+    return bcrypt.hash(value, '$2b$10$vZsjLv8pgin3zc8Pa5p5r.');
   }
 
   async createUser(body: CreateUserDto): Promise<User> {
@@ -79,7 +79,7 @@ export class UserService {
     return updatedUser;
   }
 
-  async deleteUser(user: User) {
-    await dbClient.user.delete({ where: { id: user.id } });
+  deleteUser(user: User) {
+    return dbClient.user.delete({ where: { id: user.id } });
   }
 }

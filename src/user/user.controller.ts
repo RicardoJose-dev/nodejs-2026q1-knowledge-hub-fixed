@@ -63,7 +63,7 @@ export class UserController {
     @Body() body: UpdatePasswordDto,
   ): Promise<UserResponseDto> {
     const user = await this.userService.getUserById(userId);
-    const updatedUser = this.userService.updateUser(user, body);
+    const updatedUser = await this.userService.updateUser(user, body);
 
     return plainToInstance(UserResponseDto, updatedUser);
   }
@@ -75,6 +75,6 @@ export class UserController {
   @HttpCode(204)
   async deleteUser(@Param('userId', new ParseUUIDPipe()) userId: string) {
     const user = await this.userService.getUserById(userId);
-    this.userService.deleteUser(user);
+    await this.userService.deleteUser(user);
   }
 }

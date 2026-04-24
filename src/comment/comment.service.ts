@@ -19,7 +19,7 @@ export class CommentService {
     return comment;
   }
 
-  async getArticleComments(articleId: string): Promise<Comment[]> {
+  getArticleComments(articleId: string): Promise<Comment[]> {
     return dbClient.comment.findMany({
       where: { articleId },
     });
@@ -34,8 +34,8 @@ export class CommentService {
     });
   }
 
-  async deleteComment(comment: Comment) {
-    await dbClient.comment.delete({
+  deleteComment(comment: Comment) {
+    return dbClient.comment.delete({
       where: {
         id: comment.id,
       },
