@@ -56,7 +56,7 @@ export class ArticleService {
         categoryId: body.categoryId ?? null,
         tags: {
           connectOrCreate: (body.tags ?? []).map((tagName: string) => ({
-            where: { name: tagName }, // 'name' must be unique in your Tag model
+            where: { name: tagName },
             create: { name: tagName },
           })),
         },
