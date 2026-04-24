@@ -5,10 +5,10 @@ import { Article, ArticleStatus } from 'src/db/prisma/client/client';
 
 @Injectable()
 export class ArticleService {
-  async getArticles(query: ArticleQueryDto): Promise<Article[]> {
+  getArticles(query: ArticleQueryDto): Promise<Article[]> {
     const { status, categoryId, tag } = query;
 
-    return await dbClient.article.findMany({
+    return dbClient.article.findMany({
       where: {
         ...(status && { status }),
         ...(categoryId && { categoryId }),
@@ -47,8 +47,8 @@ export class ArticleService {
     return article;
   }
 
-  async createArticle(body: CreateArticleDto): Promise<Article> {
-    return await dbClient.article.create({
+  createArticle(body: CreateArticleDto): Promise<Article> {
+    return dbClient.article.create({
       data: {
         ...body,
         status: body.status ?? ArticleStatus.draft,
@@ -67,11 +67,8 @@ export class ArticleService {
     });
   }
 
-  async updateArticle(
-    article: Article,
-    body: UpdateArticleDto,
-  ): Promise<Article> {
-    return await dbClient.article.update({
+  updateArticle(article: Article, body: UpdateArticleDto): Promise<Article> {
+    return dbClient.article.update({
       where: { id: article.id },
       data: {
         ...body,
@@ -89,8 +86,8 @@ export class ArticleService {
     });
   }
 
-  async deleteArticle(article: Article) {
-    await dbClient.article.delete({
+  deleteArticle(article: Article) {
+    return dbClient.article.delete({
       where: {
         id: article.id,
       },
