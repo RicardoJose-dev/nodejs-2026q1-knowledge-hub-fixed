@@ -5,6 +5,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { CustomLogger } from './comment/logger/logger.service';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
+import { GlobalExceptionsFilter } from './common/filters/global.exceptions.filter';
 
 const port = process.env.PORT || 4000;
 
@@ -16,6 +17,7 @@ async function bootstrap() {
     logger: new CustomLogger(logLevel, isProduction),
   });
 
+  app.useGlobalFilters(new GlobalExceptionsFilter());
   app.useGlobalInterceptors(new LoggingInterceptor());
 
   app.useGlobalPipes(
