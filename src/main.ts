@@ -4,6 +4,7 @@ import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { CustomLogger } from './comment/logger/logger.service';
+import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 
 const port = process.env.PORT || 4000;
 
@@ -14,6 +15,8 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     logger: new CustomLogger(logLevel, isProduction),
   });
+
+  app.useGlobalInterceptors(new LoggingInterceptor());
 
   app.useGlobalPipes(
     new ValidationPipe({
