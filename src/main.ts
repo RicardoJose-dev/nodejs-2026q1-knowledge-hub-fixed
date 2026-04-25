@@ -3,11 +3,17 @@ import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
+import { CustomLogger } from './comment/logger/logger.service';
 
 const port = process.env.PORT || 4000;
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const logLevel = (process.env.LOG_LEVEL as any) || 'log';
+  const isProduction = process.env.NODE_ENV === 'production';
+
+  const app = await NestFactory.create(AppModule, {
+    logger: new CustomLogger(logLevel, isProduction),
+  });
 
   app.useGlobalPipes(
     new ValidationPipe({
