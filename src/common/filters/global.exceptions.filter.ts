@@ -6,6 +6,12 @@ import {
   HttpStatus,
   Logger,
 } from '@nestjs/common';
+import {
+  NotFoundError,
+  ValidationError,
+  UnauthorizedError,
+  ForbiddenError,
+} from '../errors/custom.errors';
 
 @Catch()
 export class GlobalExceptionsFilter implements ExceptionFilter {
@@ -29,9 +35,17 @@ export class GlobalExceptionsFilter implements ExceptionFilter {
       } else if (typeof exceptionResponse === 'string') {
         message = exceptionResponse;
       }
+    } else if (
+      exception instanceof NotFoundError ||
+      exception instanceof ValidationError ||
+      exception instanceof UnauthorizedError ||
+      exception instanceof ForbiddenError
+    ) {
+      status = (exception as any).statusCode;
+      error = exception.name;
+      message = exception.message;
     }
 
-    // Log the error with stack trace
     this.logger.error(
       `Error processing ${request.method} ${request.url}`,
       (exception as any).stack || String(exception),

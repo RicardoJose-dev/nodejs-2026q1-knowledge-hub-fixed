@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { ForbiddenException } from '@nestjs/common';
+import { ForbiddenError } from 'src/common/errors/custom.errors';
 
 vi.mock('jsonwebtoken', () => ({
   sign: vi.fn(),
@@ -76,13 +76,13 @@ describe('AuthService', () => {
     expect(result).toBe(payload);
   });
 
-  it('should throw ForbiddenException if token is invalid', () => {
+  it('should throw ForbiddenError if token is invalid', () => {
     (jwt.verify as any).mockImplementation(() => {
       throw new Error('Invalid token');
     });
 
     expect(() => authService.verifyRefreshToken('invalid token')).toThrow(
-      ForbiddenException,
+      ForbiddenError,
     );
   });
 });

@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { ForbiddenException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { RolesGuard } from '../roles.guard';
+import { ForbiddenError } from 'src/common/errors/custom.errors';
 
 describe('RolesGuard', () => {
   let reflector: Reflector;
@@ -44,7 +44,7 @@ describe('RolesGuard', () => {
     expect(result).toBe(true);
   });
 
-  it('should throw ForbiddenException if user is missing', () => {
+  it('should throw ForbiddenError if user is missing', () => {
     (reflector.get as any).mockReturnValue(['admin']);
 
     const req = {};
@@ -52,10 +52,10 @@ describe('RolesGuard', () => {
       getRequest: () => req,
     });
 
-    expect(() => guard.canActivate(context)).toThrow(ForbiddenException);
+    expect(() => guard.canActivate(context)).toThrow(ForbiddenError);
   });
 
-  it('should throw ForbiddenException if user does not have required role', () => {
+  it('should throw ForbiddenError if user does not have required role', () => {
     (reflector.get as any).mockReturnValue(['admin']);
 
     const req = { user: { role: 'viewer' } };
@@ -63,6 +63,6 @@ describe('RolesGuard', () => {
       getRequest: () => req,
     });
 
-    expect(() => guard.canActivate(context)).toThrow(ForbiddenException);
+    expect(() => guard.canActivate(context)).toThrow(ForbiddenError);
   });
 });

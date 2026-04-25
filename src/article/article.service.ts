@@ -1,7 +1,8 @@
-import { Injectable, NotFoundException, HttpException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import dbClient from 'src/db/prisma/dbClient';
 import { ArticleQueryDto, CreateArticleDto, UpdateArticleDto } from './dto';
 import { Article, ArticleStatus } from 'src/db/prisma/client/client';
+import { NotFoundError } from 'src/common/errors/custom.errors';
 
 @Injectable()
 export class ArticleService {
@@ -29,7 +30,7 @@ export class ArticleService {
 
   async getArticleById(
     articleId: string,
-    ExceptionClass: new (message: string) => HttpException = NotFoundException,
+    ExceptionClass: new (message: string) => Error = NotFoundError,
   ): Promise<Article> {
     const article = await dbClient.article.findUnique({
       where: {

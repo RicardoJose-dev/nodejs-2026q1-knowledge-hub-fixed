@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { NotFoundException, ForbiddenException } from '@nestjs/common';
+import { ForbiddenError, NotFoundError } from 'src/common/errors/custom.errors';
 
 vi.mock('bcryptjs', () => ({
   hash: vi.fn(),
@@ -56,12 +56,10 @@ describe('UserService', () => {
     expect(result).toEqual(mockUser);
   });
 
-  it('should throw NotFoundException if user not found', async () => {
+  it('should throw NotFoundError if user not found', async () => {
     (dbClient.user.findUnique as any).mockResolvedValue(null);
 
-    await expect(userService.getUserById('2')).rejects.toThrow(
-      NotFoundException,
-    );
+    await expect(userService.getUserById('2')).rejects.toThrow(NotFoundError);
   });
 
   it('should return user if credentials are valid', async () => {
@@ -75,12 +73,12 @@ describe('UserService', () => {
     expect(result).toEqual(mockUser);
   });
 
-  it('should throw ForbiddenException if credentials are invalid', async () => {
+  it('should throw ForbiddenError if credentials are invalid', async () => {
     (dbClient.user.findUnique as any).mockResolvedValue(null);
 
     const where = { login: 'user2' };
     await expect(userService.getUserByCredentials(where)).rejects.toThrow(
-      ForbiddenException,
+      ForbiddenError,
     );
   });
 
@@ -178,7 +176,7 @@ describe('UserService', () => {
     expect(result).toEqual(updatedUser);
   });
 
-  it('should throw ForbiddenException if old password does not match', async () => {
+  it('should throw ForbiddenError if old password does not match', async () => {
     const user = {
       id: '1',
       login: 'userlogin',
@@ -193,7 +191,7 @@ describe('UserService', () => {
     userService.hashValue = vi.fn().mockResolvedValue('hashed-wrong');
 
     await expect(userService.updateUser(user, body)).rejects.toThrow(
-      ForbiddenException,
+      ForbiddenError,
     );
 
     expect(userService.hashValue).toHaveBeenCalledWith('wrongpass');

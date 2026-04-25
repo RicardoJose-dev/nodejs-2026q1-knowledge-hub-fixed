@@ -1,4 +1,4 @@
-import { BadRequestException } from '@nestjs/common';
+import { ValidationError } from 'src/common/errors/custom.errors';
 import { CustomParseUUIDPipe } from '../CustomParseUUIDPipe';
 
 describe('CustomParseUUIDPipe', () => {
@@ -13,7 +13,7 @@ describe('CustomParseUUIDPipe', () => {
     expect(pipe.transform(uuid)).toBe(uuid);
   });
 
-  it('should throw BadRequestException if value is not a valid UUID', () => {
-    expect(() => pipe.transform('not-a-uuid')).toThrow(BadRequestException);
+  it('should throw ValidationError if value is not a valid UUID', () => {
+    expect(() => pipe.transform('not-a-uuid')).toThrow(ValidationError);
   });
 });
