@@ -1,4 +1,4 @@
-import * as request from 'supertest';
+const request = require('supertest');
 import 'dotenv/config';
 
 const port = process.env.PORT || 4000;

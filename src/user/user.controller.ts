@@ -7,12 +7,14 @@ import {
   HttpCode,
   Param,
   Body,
-  ParseUUIDPipe,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
-import { plainToInstance } from 'class-transformer';
 import { ApiOperation } from '@nestjs/swagger';
+import { CustomParseUUIDPipe } from 'src/common/pipes/CustomParseUUIDPipe';
+import { TransformInterceptor } from 'src/common/interceptors/TransformInterceptor';
 import { RolesGuard, TokenGuard } from 'src/common/guards';
+import { User } from 'src/db/prisma/client/client';
 import { AdminAuth, EditorAuth, ViewerAuth } from 'src/common/decorators';
 import { UserService } from './user.service';
 import { CreateUserDto, UpdatePasswordDto, UserResponseDto } from './dto';
@@ -26,9 +28,9 @@ export class UserController {
   @ViewerAuth()
   @ApiOperation({ summary: 'Get all users' })
   @HttpCode(200)
-  async getUsers(): Promise<UserResponseDto[]> {
-    const users = await this.userService.getUsers();
-    return plainToInstance(UserResponseDto, users);
+  @UseInterceptors(new TransformInterceptor(UserResponseDto))
+  getUsers(): Promise<User[]> {
+    return this.userService.getUsers();
   }
 
   @Get(':userId')
@@ -36,11 +38,11 @@ export class UserController {
   @ViewerAuth()
   @ApiOperation({ summary: 'Get user by id' })
   @HttpCode(200)
+  @UseInterceptors(new TransformInterceptor(UserResponseDto))
   async getUserById(
-    @Param('userId', new ParseUUIDPipe()) userId: string,
-  ): Promise<UserResponseDto> {
-    const user = await this.userService.getUserById(userId);
-    return plainToInstance(UserResponseDto, user);
+    @Param('userId', new CustomParseUUIDPipe()) userId: string,
+  ): Promise<User> {
+    return await this.userService.getUserById(userId);
   }
 
   @Post()
@@ -48,9 +50,9 @@ export class UserController {
   @AdminAuth()
   @ApiOperation({ summary: 'Create user' })
   @HttpCode(201)
-  async createUser(@Body() body: CreateUserDto): Promise<UserResponseDto> {
-    const user = await this.userService.createUser(body);
-    return plainToInstance(UserResponseDto, user);
+  @UseInterceptors(new TransformInterceptor(UserResponseDto))
+  async createUser(@Body() body: CreateUserDto): Promise<User> {
+    return await this.userService.createUser(body);
   }
 
   @Put(':userId')
@@ -58,14 +60,13 @@ export class UserController {
   @EditorAuth()
   @ApiOperation({ summary: 'update user' })
   @HttpCode(200)
+  @UseInterceptors(new TransformInterceptor(UserResponseDto))
   async updateUser(
-    @Param('userId', new ParseUUIDPipe()) userId: string,
+    @Param('userId', new CustomParseUUIDPipe()) userId: string,
     @Body() body: UpdatePasswordDto,
-  ): Promise<UserResponseDto> {
+  ): Promise<User> {
     const user = await this.userService.getUserById(userId);
-    const updatedUser = this.userService.updateUser(user, body);
-
-    return plainToInstance(UserResponseDto, updatedUser);
+    return await this.userService.updateUser(user, body);
   }
 
   @Delete(':userId')
@@ -73,8 +74,8 @@ export class UserController {
   @AdminAuth()
   @ApiOperation({ summary: 'Delete user' })
   @HttpCode(204)
-  async deleteUser(@Param('userId', new ParseUUIDPipe()) userId: string) {
+  async deleteUser(@Param('userId', new CustomParseUUIDPipe()) userId: string) {
     const user = await this.userService.getUserById(userId);
-    this.userService.deleteUser(user);
+    await this.userService.deleteUser(user);
   }
 }

@@ -10,6 +10,8 @@ import { CreateUserDto, UpdatePasswordDto } from './dto';
 
 @Injectable()
 export class UserService {
+  public readonly salt = '$2b$10$vZsjLv8pgin3zc8Pa5p5r.';
+
   getUsers(): Promise<User[]> {
     return dbClient.user.findMany();
   }
@@ -40,8 +42,8 @@ export class UserService {
     return user;
   }
 
-  async hashValue(value: string) {
-    return await bcrypt.hash(value, '$2b$10$vZsjLv8pgin3zc8Pa5p5r.');
+  hashValue(value: string) {
+    return bcrypt.hash(value, this.salt);
   }
 
   async createUser(body: CreateUserDto): Promise<User> {
@@ -79,7 +81,7 @@ export class UserService {
     return updatedUser;
   }
 
-  async deleteUser(user: User) {
-    await dbClient.user.delete({ where: { id: user.id } });
+  deleteUser(user: User) {
+    return dbClient.user.delete({ where: { id: user.id } });
   }
 }

@@ -8,11 +8,12 @@ import {
   HttpCode,
   Param,
   Body,
-  ParseUUIDPipe,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { ApiOperation } from '@nestjs/swagger';
-import { plainToInstance } from 'class-transformer';
+import { CustomParseUUIDPipe } from 'src/common/pipes/CustomParseUUIDPipe';
+import { TransformInterceptor } from 'src/common/interceptors/TransformInterceptor';
 import { UserService } from 'src/user/user.service';
 import { ArticleService } from './article.service';
 import { CategoryService } from 'src/category/category.service';
@@ -24,6 +25,7 @@ import {
   UpdateArticleDto,
   ArticleResponseDto,
 } from './dto';
+import { Article } from 'src/db/prisma/client/client';
 
 @Controller('article')
 export class ArticleController {
@@ -38,11 +40,9 @@ export class ArticleController {
   @ViewerAuth()
   @ApiOperation({ summary: 'Get all articles' })
   @HttpCode(200)
-  async getArticles(
-    @Query() query: ArticleQueryDto,
-  ): Promise<ArticleResponseDto[]> {
-    const articles = await this.articleService.getArticles(query);
-    return plainToInstance(ArticleResponseDto, articles);
+  @UseInterceptors(new TransformInterceptor(ArticleResponseDto))
+  getArticles(@Query() query: ArticleQueryDto): Promise<Article[]> {
+    return this.articleService.getArticles(query);
   }
 
   @Get(':id')
@@ -50,11 +50,11 @@ export class ArticleController {
   @ViewerAuth()
   @ApiOperation({ summary: 'Get articles by id' })
   @HttpCode(200)
+  @UseInterceptors(new TransformInterceptor(ArticleResponseDto))
   async getArticleById(
-    @Param('id', new ParseUUIDPipe()) id: string,
-  ): Promise<ArticleResponseDto> {
-    const article = await this.articleService.getArticleById(id);
-    return plainToInstance(ArticleResponseDto, article);
+    @Param('id', new CustomParseUUIDPipe()) id: string,
+  ): Promise<Article> {
+    return await this.articleService.getArticleById(id);
   }
 
   @Post()
@@ -62,9 +62,8 @@ export class ArticleController {
   @EditorAuth()
   @ApiOperation({ summary: 'Create article' })
   @HttpCode(201)
-  async createArticle(
-    @Body() body: CreateArticleDto,
-  ): Promise<ArticleResponseDto> {
+  @UseInterceptors(new TransformInterceptor(ArticleResponseDto))
+  async createArticle(@Body() body: CreateArticleDto): Promise<Article> {
     const { authorId, categoryId } = body;
 
     if (authorId) {
@@ -75,8 +74,7 @@ export class ArticleController {
       await this.catergoryService.getCategoryById(categoryId);
     }
 
-    const article = await this.articleService.createArticle(body);
-    return plainToInstance(ArticleResponseDto, article);
+    return await this.articleService.createArticle(body);
   }
 
   @Put(':id')
@@ -84,10 +82,11 @@ export class ArticleController {
   @EditorAuth()
   @ApiOperation({ summary: 'Update article' })
   @HttpCode(200)
+  @UseInterceptors(new TransformInterceptor(ArticleResponseDto))
   async updateArticle(
-    @Param('id', new ParseUUIDPipe()) id: string,
+    @Param('id', new CustomParseUUIDPipe()) id: string,
     @Body() body: UpdateArticleDto,
-  ): Promise<ArticleResponseDto> {
+  ): Promise<Article> {
     const { categoryId } = body;
 
     if (categoryId) {
@@ -100,7 +99,7 @@ export class ArticleController {
       body,
     );
 
-    return plainToInstance(ArticleResponseDto, updatedArticle);
+    return updatedArticle;
   }
 
   @Delete(':id')
@@ -108,8 +107,8 @@ export class ArticleController {
   @AdminAuth()
   @ApiOperation({ summary: 'Delete article' })
   @HttpCode(204)
-  async deleteArticle(@Param('id', new ParseUUIDPipe()) id: string) {
+  async deleteArticle(@Param('id', new CustomParseUUIDPipe()) id: string) {
     const article = await this.articleService.getArticleById(id);
-    await this.articleService.deleteArticle(article);
+    return await this.articleService.deleteArticle(article);
   }
 }
