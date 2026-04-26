@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { UnauthorizedException } from '@nestjs/common';
+import { UnauthorizedError } from 'src/common/errors/custom.errors';
 
 vi.mock('src/auth/utils', () => ({
   verifyAccessToken: vi.fn(),
@@ -26,7 +26,7 @@ describe('TokenGuard', () => {
   });
 
   it('should throw if Authorization header is missing', () => {
-    expect(() => guard.canActivate(context)).toThrow(UnauthorizedException);
+    expect(() => guard.canActivate(context)).toThrow(UnauthorizedError);
   });
 
   it('should throw if Authorization header does not start with Bearer', () => {
@@ -36,7 +36,7 @@ describe('TokenGuard', () => {
       }),
     });
 
-    expect(() => guard.canActivate(context)).toThrow(UnauthorizedException);
+    expect(() => guard.canActivate(context)).toThrow(UnauthorizedError);
   });
 
   it('should throw if token is missing after Bearer', () => {
@@ -46,7 +46,7 @@ describe('TokenGuard', () => {
       }),
     });
 
-    expect(() => guard.canActivate(context)).toThrow(UnauthorizedException);
+    expect(() => guard.canActivate(context)).toThrow(UnauthorizedError);
   });
 
   it('should set request.user and return true if token is valid', () => {

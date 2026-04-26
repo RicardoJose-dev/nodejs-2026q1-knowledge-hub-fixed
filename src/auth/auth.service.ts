@@ -1,9 +1,10 @@
 import 'dotenv/config';
 import * as jwt from 'jsonwebtoken';
 import { SignOptions } from 'jsonwebtoken';
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { User } from 'src/db/prisma/client/client';
 import { TokenPayload } from './dto';
+import { ForbiddenError } from 'src/common/errors/custom.errors';
 
 @Injectable()
 export class AuthService {
@@ -37,7 +38,7 @@ export class AuthService {
         algorithms: ['HS256'],
       }) as TokenPayload;
     } catch (err) {
-      throw new ForbiddenException('Invalid or expired token');
+      throw new ForbiddenError('Invalid or expired token');
     }
   }
 }

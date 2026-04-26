@@ -1,12 +1,9 @@
-import {
-  Injectable,
-  NotFoundException,
-  ForbiddenException,
-} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import * as bcrypt from 'bcryptjs';
 import dbClient from 'src/db/prisma/dbClient';
 import { User, UserRole } from 'src/db/prisma/client/client';
 import { CreateUserDto, UpdatePasswordDto } from './dto';
+import { ForbiddenError, NotFoundError } from 'src/common/errors/custom.errors';
 
 @Injectable()
 export class UserService {
@@ -24,7 +21,7 @@ export class UserService {
     });
 
     if (!user) {
-      throw new NotFoundException('User not found');
+      throw new NotFoundError('User not found');
     }
 
     return user;
@@ -36,7 +33,7 @@ export class UserService {
     });
 
     if (!user) {
-      throw new ForbiddenException('Authentication failed');
+      throw new ForbiddenError('Authentication failed');
     }
 
     return user;
@@ -68,7 +65,7 @@ export class UserService {
     const hashedOldPassword = await this.hashValue(oldPassword);
 
     if (currentPasswrod !== hashedOldPassword) {
-      throw new ForbiddenException('old password does not match');
+      throw new ForbiddenError('old password does not match');
     }
 
     const updatedUser = await dbClient.user.update({

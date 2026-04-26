@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { NotFoundException, ForbiddenException } from '@nestjs/common';
+import { ForbiddenError, NotFoundError } from 'src/common/errors/custom.errors';
 
 vi.mock('src/db/prisma/dbClient', () => ({
   default: {
@@ -165,11 +165,11 @@ describe('ArticleService', () => {
     expect(result).toEqual(mockArticle);
   });
 
-  it('should throw NotFoundException if article not found (default)', async () => {
+  it('should throw NotFoundError if article not found (default)', async () => {
     (dbClient.article.findUnique as any).mockResolvedValue(null);
 
     await expect(articleService.getArticleById('2')).rejects.toThrow(
-      NotFoundException,
+      NotFoundError,
     );
   });
 
@@ -177,17 +177,17 @@ describe('ArticleService', () => {
     (dbClient.article.findUnique as any).mockResolvedValue(null);
 
     await expect(
-      articleService.getArticleById('3', ForbiddenException),
-    ).rejects.toThrow(ForbiddenException);
+      articleService.getArticleById('3', ForbiddenError),
+    ).rejects.toThrow(ForbiddenError);
   });
 
   it('should pass the correct message to the exception', async () => {
     (dbClient.article.findUnique as any).mockResolvedValue(null);
 
     try {
-      await articleService.getArticleById('4', ForbiddenException);
+      await articleService.getArticleById('4', ForbiddenError);
     } catch (e) {
-      expect(e).toBeInstanceOf(ForbiddenException);
+      expect(e).toBeInstanceOf(ForbiddenError);
       expect(e.message).toBe('Article not found');
     }
   });

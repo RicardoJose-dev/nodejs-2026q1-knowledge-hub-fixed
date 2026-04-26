@@ -1,6 +1,6 @@
 import * as jwt from 'jsonwebtoken';
-import { ForbiddenException } from '@nestjs/common';
 import { TokenPayload } from './dto';
+import { ForbiddenError } from 'src/common/errors/custom.errors';
 
 export function verifyAccessToken(token: string): TokenPayload {
   try {
@@ -8,6 +8,6 @@ export function verifyAccessToken(token: string): TokenPayload {
       algorithms: ['HS256'],
     }) as TokenPayload;
   } catch (err) {
-    throw new ForbiddenException('Invalid or expired token');
+    throw new ForbiddenError('Invalid or expired token');
   }
 }
