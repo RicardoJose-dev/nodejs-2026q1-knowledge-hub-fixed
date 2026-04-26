@@ -1,4 +1,10 @@
-import { Controller, Post, HttpCode, Body } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  HttpCode,
+  Body,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { ApiOperation } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { UserService } from 'src/user/user.service';
@@ -48,12 +54,17 @@ export class AuthController {
   }
 
   @Post('refresh')
-  @ApiOperation({ summary: 'Log user' })
+  @ApiOperation({ summary: 'Refresh tokens' })
   @HttpCode(200)
   async refresh(
     @Body() body: RefreshBody,
   ): Promise<{ accessToken: string; refreshToken: string }> {
     const { refreshToken } = body;
+
+    if (!refreshToken) {
+      throw new UnauthorizedException('No refresh token provided');
+    }
+
     const { login, userId } = this.authService.verifyRefreshToken(refreshToken);
 
     const user = await this.userService.getUserByCredentials({

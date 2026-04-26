@@ -2,18 +2,17 @@ import { validate } from 'class-validator';
 import { RefreshBody } from '../RefreshBody';
 
 describe('RefreshBody validation', () => {
-  it('should fail if refreshToken is missing', async () => {
+  it('should pass if refreshToken is missing', async () => {
     const dto = new RefreshBody();
     const errors = await validate(dto);
-    expect(errors.length).toBeGreaterThan(0);
-    expect(errors.some((e) => e.property === 'refreshToken')).toBe(true);
+    expect(errors.length).toBe(0);
   });
 
-  it('should fail if refreshToken is empty', async () => {
+  it('should pass if refreshToken is empty string', async () => {
     const dto = new RefreshBody();
     dto.refreshToken = '';
     const errors = await validate(dto);
-    expect(errors.some((e) => e.property === 'refreshToken')).toBe(true);
+    expect(errors.some((e) => e.property === 'refreshToken')).toBe(false);
   });
 
   it('should fail if refreshToken is not a string', async () => {
