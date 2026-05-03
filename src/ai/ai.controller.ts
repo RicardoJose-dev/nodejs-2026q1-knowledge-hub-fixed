@@ -1,4 +1,4 @@
-import { Controller, Post, HttpCode, Param, Body } from '@nestjs/common';
+import { Controller, Get, Post, HttpCode, Param, Body } from '@nestjs/common';
 import { ApiOperation } from '@nestjs/swagger';
 import { ArticleService } from 'src/article/article.service';
 import { CustomParseUUIDPipe } from 'src/common/pipes/CustomParseUUIDPipe';
@@ -14,6 +14,7 @@ import {
   GenerateContentDto,
 } from './dto';
 import { MaxLength, Task } from './dto/types';
+import { AiUsageService } from './usage.service';
 
 @Controller('ai')
 export class AIController {
@@ -21,6 +22,7 @@ export class AIController {
     private readonly aiService: AIService,
     private readonly articleService: ArticleService,
     private readonly cacheService: AiCacheService,
+    private readonly usageService: AiUsageService,
   ) {}
 
   @Post('articles/:articleId/summarize')
@@ -30,6 +32,8 @@ export class AIController {
     @Param('articleId', new CustomParseUUIDPipe()) articleId: string,
     @Body() body: SummarizeArticleDto,
   ): Promise<SummarizeArticleResponseDto> {
+    this.usageService.increment('summarize');
+
     const { maxLength = MaxLength.Medium } = body;
 
     const article = await this.articleService.getArticleById(articleId);
@@ -69,6 +73,8 @@ export class AIController {
     @Param('articleId', new CustomParseUUIDPipe()) articleId: string,
     @Body() body: TranslateArticleDto,
   ): Promise<TranslateArticleResponseDto> {
+    this.usageService.increment('translate');
+
     const { targetLanguage, sourceLanguage } = body;
 
     const article = await this.articleService.getArticleById(articleId);
@@ -102,6 +108,8 @@ export class AIController {
     @Param('articleId', new CustomParseUUIDPipe()) articleId: string,
     @Body() body: AnalyzeArticleDto,
   ): Promise<AnalyzeArticleResponseDto> {
+    this.usageService.increment('analyse');
+
     const { task = Task.Review } = body;
 
     const article = await this.articleService.getArticleById(articleId);
@@ -113,7 +121,16 @@ export class AIController {
   @ApiOperation({ summary: 'Free-form generation' })
   @HttpCode(200)
   async generateContent(@Body() body: GenerateContentDto): Promise<string> {
+    this.usageService.increment('generate');
     const { prompt } = body;
     return await this.aiService.generateFreeFromContent(prompt);
+  }
+
+  @Get('usage')
+  getUsage() {
+    return {
+      total: this.usageService.getTotalRequests(),
+      byEndpoint: this.usageService.getRequestsByEndpoint(),
+    };
   }
 }
