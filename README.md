@@ -16,7 +16,7 @@ git clone {repository URL}
 ```
 npm install
 
-docker compose up --build 
+docker compose up --build
 (use localhost for POSTGRES_HOST if running the command outside the docker container)
 
 i.e
@@ -24,7 +24,7 @@ i.e
 DATABASE_URL="postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@localhost:{POSTGRES_PORT}/{POSTGRES_DB}" npx prisma migrate dev
 
 
-npx prisma db seed --schema=src/db/schema.prisma 
+npx prisma db seed --schema=src/db/schema.prisma
 (use localhost for POSTGRES_HOST if running the command outside the docker container)
 
 i.e
@@ -107,3 +107,46 @@ For more information, visit: https://code.visualstudio.com/docs/editor/debugging
 ### Dcoker image
 
 docker pull ricardojosedev/course:latest
+
+### Generate Gemini API Key
+
+```
+visit https://aistudio.google.com/
+click on "get started" (login)
+on the left panel, it should be "Get API key" menu option. click this option
+click on "Create API Key"
+
+Gemini Model
+gemini-2.5-flash
+```
+
+### Run application
+
+```
+Steps
+
+create env file from env.example file
+npm install
+docker compose up --build
+
+run migrations
+
+(from outside container)
+DATABASE_URL="postgresql://admin:admin@localhost:5432/knowledgehubdb" npx prisma migrate dev --schema=src/db/prisma/schema.prisma
+
+(from within container)
+DATABASE_URL="postgresql://admin:admin@db:5432/knowledgehubdb" npx prisma migrate dev --schema=src/db/prisma/schema.prisma
+
+run seed
+
+DATABASE_URL="postgresql://admin:admin@localhost:5432/knowledgehubdb" npx prisma db seed
+
+(from within container)
+DATABASE_URL="postgresql://admin:admin@db:5432/knowledgehubdb" npx prisma db seed
+
+seed contains an admin user. login: admin, password: admin
+
+by default app uses port 7000:
+
+curl -X POST http://localhost:7000/article
+```
