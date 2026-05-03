@@ -11,7 +11,7 @@ import {
   AnalyzeArticleDto,
   AnalyzeArticleResponseDto,
 } from './dto';
-import { MaxLength } from './dto/types';
+import { MaxLength, Task } from './dto/types';
 
 @Controller('ai')
 export class AIController {
@@ -69,7 +69,7 @@ export class AIController {
     @Param('articleId', new CustomParseUUIDPipe()) articleId: string,
     @Body() body: AnalyzeArticleDto,
   ): Promise<AnalyzeArticleResponseDto> {
-    const { task } = body;
+    const { task = Task.Review } = body;
 
     const article = await this.articleService.getArticleById(articleId);
 

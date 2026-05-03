@@ -12,7 +12,7 @@ import {
 export class GeminiService {
   constructor(private readonly httpService: HttpService) {}
 
-  baseUrl = `${process.env.GEMINI_API_BASE_URL}/v1beta/models/${process.env.GEMINI_MODEL}:generateContent`;
+  baseUrl = `${process.env.GEMINI_API_BASE_URL}/${process.env.GEMINI_MODEL}:generateContent`;
 
   async generateWithGemini(text: string) {
     const headers = {

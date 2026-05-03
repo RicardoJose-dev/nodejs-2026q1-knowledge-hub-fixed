@@ -20,7 +20,7 @@ export function generateAnalyzeTemplate(
   return [
     prompt,
     (response: string) => response.match(/Text Analysis:\s*(.+)/i),
-    (response: string) => response.match(/Suggestion:\s*(.+)/i),
+    (response: string) => response.match(/Suggestions:\s*(.+)/i),
     (response: string) => response.match(/Severity:\s*(.+)/i),
   ];
 }
