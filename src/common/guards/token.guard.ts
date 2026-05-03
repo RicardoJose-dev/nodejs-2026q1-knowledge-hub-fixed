@@ -10,9 +10,7 @@ export class TokenGuard implements CanActivate {
       request.headers['authorization'] || request.headers['Authorization'];
 
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      throw new UnauthorizedError(
-        'Missing or invalid Authorization header',
-      );
+      throw new UnauthorizedError('Missing or invalid Authorization header');
     }
 
     const token = authHeader.split(' ')[1];
