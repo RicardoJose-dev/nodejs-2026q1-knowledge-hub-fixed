@@ -3,6 +3,7 @@ import { ApiOperation } from '@nestjs/swagger';
 import { ArticleService } from 'src/article/article.service';
 import { CustomParseUUIDPipe } from 'src/common/pipes/CustomParseUUIDPipe';
 import { AIService } from './ai.service';
+import { AiCacheService } from './cache.service';
 import {
   SummarizeArticleDto,
   SummarizeArticleResponseDto,
@@ -13,14 +14,15 @@ import {
 } from './dto';
 import { MaxLength, Task } from './dto/types';
 
-@Controller('ai')
+@Controller('ai/articles')
 export class AIController {
   constructor(
     private readonly aiService: AIService,
     private readonly articleService: ArticleService,
+    private readonly cacheService: AiCacheService,
   ) {}
 
-  @Post('articles/:articleId/summarize')
+  @Post(':articleId/summarize')
   @ApiOperation({ summary: 'Summarize article' })
   @HttpCode(200)
   async summarizeArticle(
@@ -31,20 +33,35 @@ export class AIController {
 
     const article = await this.articleService.getArticleById(articleId);
 
+    const cacheKey = this.cacheService.buildCacheKey(
+      articleId,
+      body,
+      article.updatedAt.getTime(),
+    );
+
+    const cached = this.cacheService.get(cacheKey);
+
+    if (cached) {
+      return cached as SummarizeArticleResponseDto;
+    }
+
     const summaryResult = await this.aiService.summarizeArticle(
       article,
       maxLength,
     );
 
-    return {
+    const response = {
       articleId,
       summary: summaryResult.summary,
       originalLength: summaryResult.originalLength,
       summaryLength: summaryResult.summaryLength,
     };
+
+    this.cacheService.set(cacheKey, response);
+    return response;
   }
 
-  @Post('articles/:articleId/translate')
+  @Post(':articleId/translate')
   @ApiOperation({ summary: 'Translates article' })
   @HttpCode(200)
   async translateArticle(
@@ -55,14 +72,29 @@ export class AIController {
 
     const article = await this.articleService.getArticleById(articleId);
 
-    return await this.aiService.translateArticle(
+    const cacheKey = this.cacheService.buildCacheKey(
+      articleId,
+      body,
+      article.updatedAt.getTime(),
+    );
+
+    const cached = this.cacheService.get(cacheKey);
+
+    if (cached) {
+      return cached as TranslateArticleResponseDto;
+    }
+
+    const response = await this.aiService.translateArticle(
       article,
       targetLanguage,
       sourceLanguage,
     );
+
+    this.cacheService.set(cacheKey, response);
+    return response;
   }
 
-  @Post('articles/:articleId/analyze')
+  @Post(':articleId/analyze')
   @ApiOperation({ summary: 'Analyses article' })
   @HttpCode(200)
   async analyzeArticle(
