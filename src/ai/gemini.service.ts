@@ -14,7 +14,7 @@ export class GeminiService {
 
   baseUrl = `${process.env.GEMINI_API_BASE_URL}/v1beta/models/${process.env.GEMINI_MODEL}:generateContent`;
 
-  generateWithGemini(text: string) {
+  async generateWithGemini(text: string) {
     const headers = {
       'Content-Type': 'application/json',
       'X-goog-api-key': process.env.GEMINI_API_KEY,
@@ -32,8 +32,16 @@ export class GeminiService {
       ],
     };
 
-    const response = this.httpService.post(this.baseUrl, data, { headers });
-    return firstValueFrom(response);
+    const responseStream = this.httpService.post(this.baseUrl, data, {
+      headers,
+    });
+
+    const response = await firstValueFrom(responseStream);
+    return response.data.candidates?.[0]?.content?.parts?.[0]?.text;
+  }
+
+  getMatchedText(match: RegExpMatchArray) {
+    return match ? match[1].trim() : '';
   }
 
   summarizeContent(content: string, maxLength: MaxLength) {
@@ -41,25 +49,44 @@ export class GeminiService {
     return this.generateWithGemini(prompt);
   }
 
-  translateContent(
+  async translateContent(
     content: string,
     targetLanguage: string,
     sourceLanguage?: string,
   ) {
-    const prompt = generateTranslateTemplate(
-      content,
-      targetLanguage,
-      sourceLanguage,
-    );
-    return this.generateWithGemini(prompt);
+    const [prompt, translationMatchFn, languageMatchFn] =
+      generateTranslateTemplate(content, targetLanguage, sourceLanguage);
+    const response = await this.generateWithGemini(prompt);
+
+    const translationMatch = translationMatchFn(response);
+    const languageMatch = languageMatchFn(response);
+
+    return {
+      translatedText: this.getMatchedText(translationMatch),
+      detectedLanguage: this.getMatchedText(languageMatch),
+    };
   }
 
-  analyzeContent(content: string, task: Task) {
-    const prompt = generateAnalyzeTemplate(
-      content,
-      task === Task.Bugs ? 'identify any bugs' : task,
-    );
+  async analyzeContent(content: string, task: Task) {
+    const [prompt, analysisMatchFn, suggestionMatchFn, severityMatchFn] =
+      generateAnalyzeTemplate(
+        content,
+        task === Task.Bugs ? 'identify any bugs' : task,
+      );
 
-    return this.generateWithGemini(prompt);
+    const response = await this.generateWithGemini(prompt);
+
+    const analysisMatch = analysisMatchFn(response);
+    const suggestionMatch = suggestionMatchFn(response);
+    const severityMatch = severityMatchFn(response);
+
+    return {
+      analysis: this.getMatchedText(analysisMatch),
+      suggestions: this.getMatchedText(suggestionMatch)
+        .split(',')
+        .map((suggestion) => suggestion.trim())
+        .filter((suggestion) => suggestion.length > 0),
+      severity: this.getMatchedText(severityMatch),
+    };
   }
 }

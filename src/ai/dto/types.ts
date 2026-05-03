@@ -10,3 +10,9 @@ export enum Task {
   Optimize = 'optimize',
   Explain = 'explain',
 }
+
+export enum Severity {
+  Info = 'info',
+  Warning = 'warning',
+  Error = 'error',
+}
