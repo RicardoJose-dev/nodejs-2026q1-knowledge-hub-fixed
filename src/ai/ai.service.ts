@@ -58,4 +58,8 @@ export class AIService {
       severity: analysedArticle.severity as Severity,
     };
   }
+
+  async generateFreeFromContent(prompt: string) {
+    return await this.geminiService.generateWithGemini(prompt);
+  }
 }

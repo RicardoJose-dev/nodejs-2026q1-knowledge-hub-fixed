@@ -11,10 +11,11 @@ import {
   TranslateArticleResponseDto,
   AnalyzeArticleDto,
   AnalyzeArticleResponseDto,
+  GenerateContentDto,
 } from './dto';
 import { MaxLength, Task } from './dto/types';
 
-@Controller('ai/articles')
+@Controller('ai')
 export class AIController {
   constructor(
     private readonly aiService: AIService,
@@ -22,7 +23,7 @@ export class AIController {
     private readonly cacheService: AiCacheService,
   ) {}
 
-  @Post(':articleId/summarize')
+  @Post('articles/:articleId/summarize')
   @ApiOperation({ summary: 'Summarize article' })
   @HttpCode(200)
   async summarizeArticle(
@@ -61,7 +62,7 @@ export class AIController {
     return response;
   }
 
-  @Post(':articleId/translate')
+  @Post('articles/:articleId/translate')
   @ApiOperation({ summary: 'Translates article' })
   @HttpCode(200)
   async translateArticle(
@@ -94,7 +95,7 @@ export class AIController {
     return response;
   }
 
-  @Post(':articleId/analyze')
+  @Post('articles/:articleId/analyze')
   @ApiOperation({ summary: 'Analyses article' })
   @HttpCode(200)
   async analyzeArticle(
@@ -106,5 +107,13 @@ export class AIController {
     const article = await this.articleService.getArticleById(articleId);
 
     return await this.aiService.analyzeArticle(article, task);
+  }
+
+  @Post('generate')
+  @ApiOperation({ summary: 'Free-form generation' })
+  @HttpCode(200)
+  async generateContent(@Body() body: GenerateContentDto): Promise<string> {
+    const { prompt } = body;
+    return await this.aiService.generateFreeFromContent(prompt);
   }
 }
