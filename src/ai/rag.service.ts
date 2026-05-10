@@ -23,7 +23,6 @@ export class RagService {
   vectorCollection = process.env.RAG_VECTOR_COLLECTION;
   chunkSize = Number(process.env.RAG_CHUNK_SIZE ?? 800);
   chunkOverlap = Number(process.env.RAG_CHUNK_OVERLAP ?? 200);
-  maxMessages = process.env.RAG_CONVERSATION_MAX_MESSAGES ?? 20;
 
   async reindex(body: ReindexDto): Promise<ReindexResponseDto> {
     let where: any = {};
