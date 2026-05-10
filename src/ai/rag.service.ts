@@ -2,7 +2,12 @@ import 'dotenv/config';
 import { Injectable } from '@nestjs/common';
 import { ArticleService } from 'src/article/article.service';
 import { GeminiService } from './gemini.service';
-import { ReindexRequestDto, ReindexResponseDto } from './dto';
+import {
+  ReindexRequestDto,
+  ReindexResponseDto,
+  RagSearchRequestDto,
+  RagSearchResponseDto,
+} from './dto';
 
 @Injectable()
 export class RagService {
@@ -11,11 +16,16 @@ export class RagService {
     private readonly geminiService: GeminiService,
   ) {}
 
+  vectorCollection = process.env.RAG_VECTOR_COLLECTION;
+  chunkSize = Number(process.env.RAG_CHUNK_SIZE ?? 800);
+  chunkOverlap = Number(process.env.RAG_CHUNK_OVERLAP ?? 200);
+  vectorDbUrl = process.env.RAG_VECTOR_DB_URL;
+
   async reindex(request: ReindexRequestDto): Promise<ReindexResponseDto> {
     let where: any = {};
 
     const { articleIds, onlyPublished } = request;
-    const vectorCollection = process.env.RAG_VECTOR_COLLECTION;
+    const vectorCollection = this.vectorCollection;
 
     if (articleIds && articleIds.length > 0) {
       where.id = { in: request.articleIds };
@@ -35,16 +45,13 @@ export class RagService {
       };
     }
 
-    const chunkSize = Number(process.env.RAG_CHUNK_SIZE ?? 800);
-    const chunkOverlap = Number(process.env.RAG_CHUNK_OVERLAP ?? 200);
-
     let allChunks = [];
 
     for (const article of articles) {
       const chunks = this.splitIntoChunks(
         article.content,
-        chunkSize,
-        chunkOverlap,
+        this.chunkSize,
+        this.chunkOverlap,
         article,
       );
       allChunks.push(...chunks);
@@ -52,10 +59,8 @@ export class RagService {
 
     const embeddings = await this.geminiService.embedChunks(allChunks);
 
-    const vectorDbUrl = process.env.RAG_VECTOR_DB_URL;
-
     await this.storeVectorsInQdrant(
-      vectorDbUrl,
+      this.vectorDbUrl,
       vectorCollection,
       embeddings,
       allChunks,
@@ -110,5 +115,65 @@ export class RagService {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ points }),
     });
+  }
+
+  async search(body: RagSearchRequestDto): Promise<RagSearchResponseDto> {
+    const { query, articleStatus, categoryId, tags, limit } = body;
+
+    const queryEmbedding = await this.geminiService.embedChunks([
+      { text: query },
+    ]);
+
+    const vector = queryEmbedding[0];
+
+    const filter: any = {};
+
+    if (articleStatus) {
+      filter['published'] = articleStatus === 'published';
+    }
+
+    if (categoryId) {
+      filter['categoryId'] = body.categoryId;
+    }
+
+    if (tags && tags.length > 0) {
+      filter['tags'] = { hasAll: tags };
+    }
+
+    const searchBody = {
+      vector,
+      limit: Math.min(limit ?? 5, 20),
+      filter:
+        Object.keys(filter).length > 0
+          ? {
+              must: Object.entries(filter).map(([key, value]) => ({
+                key,
+                match: { value },
+              })),
+            }
+          : undefined,
+      with_payload: true,
+      with_vector: false,
+    };
+
+    const response = await fetch(
+      `${this.vectorDbUrl}/collections/${this.vectorCollection}/points/search`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(searchBody),
+      },
+    );
+
+    const data = await response.json();
+
+    const results = (data.result || []).map((item: any) => ({
+      articleId: item.payload.articleId,
+      articleTitle: item.payload.title,
+      chunk: item.payload.text,
+      similarity: item.score,
+    }));
+
+    return { results };
   }
 }
