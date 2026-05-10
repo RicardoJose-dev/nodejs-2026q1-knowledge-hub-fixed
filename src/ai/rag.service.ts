@@ -1,8 +1,10 @@
 import 'dotenv/config';
+import { v4 as uuidv4 } from 'uuid';
 import { Injectable } from '@nestjs/common';
 import { ArticleService } from 'src/article/article.service';
 import { GeminiService } from './gemini.service';
 import { NotFoundError } from 'src/common/errors/custom.errors';
+import { ArticleStatus } from 'src/db/prisma/client/client';
 import {
   ReindexDto,
   ReindexResponseDto,
@@ -35,7 +37,7 @@ export class RagService {
     }
 
     if (onlyPublished ?? true) {
-      where.published = true;
+      where.status = ArticleStatus.published;
     }
 
     const articles = await this.articleService.findBy(where);
@@ -55,19 +57,13 @@ export class RagService {
         article.content,
         this.chunkSize,
         this.chunkOverlap,
-        article,
       );
       allChunks.push(...chunks);
     }
 
     const embeddings = await this.geminiService.embedChunks(allChunks);
 
-    await this.storeVectorsInQdrant(
-      this.vectorDbUrl,
-      vectorCollection,
-      embeddings,
-      allChunks,
-    );
+    await this.storeVectorsInQdrant(vectorCollection, embeddings, allChunks);
 
     return {
       indexedArticles: articles.length,
@@ -76,12 +72,7 @@ export class RagService {
     };
   }
 
-  splitIntoChunks(
-    text: string,
-    size: number,
-    overlap: number,
-    article: any,
-  ): any[] {
+  splitIntoChunks(text: string, size: number, overlap: number): any[] {
     const chunks = [];
     let start = 0;
     while (start < text.length) {
@@ -89,8 +80,6 @@ export class RagService {
       const chunkText = text.slice(start, end);
       chunks.push({
         text: chunkText,
-        articleId: article.id,
-        title: article.title,
       });
       start += size - overlap;
     }
@@ -98,13 +87,12 @@ export class RagService {
   }
 
   async storeVectorsInQdrant(
-    dbUrl: string,
     collection: string,
     embeddings: number[][],
     chunks: any[],
   ) {
     const points = embeddings.map((vector, idx) => ({
-      id: `${chunks[idx].articleId}_${idx}`,
+      id: uuidv4(),
       vector,
       payload: {
         text: chunks[idx].text,
@@ -113,10 +101,25 @@ export class RagService {
       },
     }));
 
-    await fetch(`${dbUrl}/collections/${collection}/points?wait=true`, {
+    await fetch(`${this.vectorDbUrl}/collections/${collection}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        vectors: {
+          size: embeddings[0].length,
+          distance: 'Cosine',
+        },
+      }),
+    });
+
+    await fetch(`${this.vectorDbUrl}/collections/${collection}/points`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ points }),
+      body: JSON.stringify({
+        points,
+      }),
     });
   }
 

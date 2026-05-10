@@ -101,11 +101,9 @@ export class GeminiService {
 
     for (const chunk of chunks) {
       const data = {
-        content: [
-          {
-            parts: [chunk],
-          },
-        ],
+        content: {
+          parts: [chunk],
+        },
       };
 
       try {
@@ -114,12 +112,11 @@ export class GeminiService {
         });
 
         const response = await firstValueFrom(responseStream);
-        embeddings.push((response as any).embedding.values);
+        embeddings.push((response as any).data.embedding.values);
       } catch (error) {
         embeddings.push([]);
       }
-
-      return embeddings;
     }
+    return embeddings;
   }
 }
