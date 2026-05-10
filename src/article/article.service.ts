@@ -48,6 +48,15 @@ export class ArticleService {
     return article;
   }
 
+  async findBy(where: any): Promise<Article[]> {
+    return dbClient.article.findMany({
+      where,
+      include: {
+        tags: true,
+      },
+    });
+  }
+
   createArticle(body: CreateArticleDto): Promise<Article> {
     return dbClient.article.create({
       data: {

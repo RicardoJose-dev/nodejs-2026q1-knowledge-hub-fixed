@@ -4,6 +4,8 @@ import { ArticleService } from 'src/article/article.service';
 import { CustomParseUUIDPipe } from 'src/common/pipes/CustomParseUUIDPipe';
 import { AIService } from './ai.service';
 import { AiCacheService } from './cache.service';
+import { RagService } from './rag.service';
+import { AiUsageService } from './usage.service';
 import {
   SummarizeArticleDto,
   SummarizeArticleResponseDto,
@@ -14,7 +16,6 @@ import {
   GenerateContentDto,
 } from './dto';
 import { MaxLength, Task } from './dto/types';
-import { AiUsageService } from './usage.service';
 
 @Controller('ai')
 export class AIController {
@@ -23,6 +24,7 @@ export class AIController {
     private readonly articleService: ArticleService,
     private readonly cacheService: AiCacheService,
     private readonly usageService: AiUsageService,
+    private readonly ragService: RagService,
   ) {}
 
   @Post('articles/:articleId/summarize')

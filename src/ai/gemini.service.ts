@@ -89,4 +89,37 @@ export class GeminiService {
       severity: this.getMatchedText(severityMatch),
     };
   }
+
+  async embedChunks(chunks: { text: string }[]): Promise<number[][]> {
+    const embeddings: number[][] = [];
+    const embedUrl = `${process.env.GEMINI_API_BASE_URL}/${process.env.GEMINI_EMBEDDING_MODEL}:embedContent`;
+
+    const headers = {
+      'Content-Type': 'application/json',
+      'X-goog-api-key': process.env.GEMINI_API_KEY,
+    };
+
+    for (const chunk of chunks) {
+      const data = {
+        content: [
+          {
+            parts: [chunk],
+          },
+        ],
+      };
+
+      try {
+        const responseStream = await this.httpService.post(embedUrl, data, {
+          headers,
+        });
+
+        const response = await firstValueFrom(responseStream);
+        embeddings.push((response as any).embedding.values);
+      } catch (error) {
+        embeddings.push([]);
+      }
+
+      return embeddings;
+    }
+  }
 }
