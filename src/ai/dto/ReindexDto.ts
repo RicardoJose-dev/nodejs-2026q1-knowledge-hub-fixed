@@ -1,6 +1,6 @@
 import { IsOptional, IsBoolean, IsArray, IsString } from 'class-validator';
 
-export class ReindexRequestDto {
+export class ReindexDto {
   @IsOptional()
   @IsBoolean()
   onlyPublished?: boolean = true;

@@ -8,7 +8,7 @@ import {
   IsIn,
 } from 'class-validator';
 
-export class RagSearchRequestDto {
+export class RagSearchDto {
   @IsString()
   query: string;
 

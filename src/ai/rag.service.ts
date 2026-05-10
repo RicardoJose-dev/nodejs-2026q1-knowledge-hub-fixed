@@ -2,11 +2,14 @@ import 'dotenv/config';
 import { Injectable } from '@nestjs/common';
 import { ArticleService } from 'src/article/article.service';
 import { GeminiService } from './gemini.service';
+import { NotFoundError } from 'src/common/errors/custom.errors';
 import {
-  ReindexRequestDto,
+  ReindexDto,
   ReindexResponseDto,
-  RagSearchRequestDto,
+  RagSearchDto,
   RagSearchResponseDto,
+  RagChatDto,
+  RagChatResponseDto,
 } from './dto';
 
 @Injectable()
@@ -16,19 +19,20 @@ export class RagService {
     private readonly geminiService: GeminiService,
   ) {}
 
+  vectorDbUrl = process.env.RAG_VECTOR_DB_URL;
   vectorCollection = process.env.RAG_VECTOR_COLLECTION;
   chunkSize = Number(process.env.RAG_CHUNK_SIZE ?? 800);
   chunkOverlap = Number(process.env.RAG_CHUNK_OVERLAP ?? 200);
-  vectorDbUrl = process.env.RAG_VECTOR_DB_URL;
+  maxMessages = process.env.RAG_CONVERSATION_MAX_MESSAGES ?? 20;
 
-  async reindex(request: ReindexRequestDto): Promise<ReindexResponseDto> {
+  async reindex(body: ReindexDto): Promise<ReindexResponseDto> {
     let where: any = {};
 
-    const { articleIds, onlyPublished } = request;
+    const { articleIds, onlyPublished } = body;
     const vectorCollection = this.vectorCollection;
 
     if (articleIds && articleIds.length > 0) {
-      where.id = { in: request.articleIds };
+      where.id = { in: body.articleIds };
     }
 
     if (onlyPublished ?? true) {
@@ -117,7 +121,7 @@ export class RagService {
     });
   }
 
-  async search(body: RagSearchRequestDto): Promise<RagSearchResponseDto> {
+  async search(body: RagSearchDto): Promise<RagSearchResponseDto> {
     const { query, articleStatus, categoryId, tags, limit } = body;
 
     const queryEmbedding = await this.geminiService.embedChunks([
@@ -175,5 +179,88 @@ export class RagService {
     }));
 
     return { results };
+  }
+
+  async chat(body: RagChatDto): Promise<RagChatResponseDto> {
+    const { conversationId } = body;
+
+    const queryEmbedding = await this.geminiService.embedChunks([
+      { text: body.question },
+    ]);
+
+    const vector = queryEmbedding[0];
+    const limit = 5;
+
+    const searchBody = {
+      vector,
+      limit,
+      with_payload: true,
+      with_vector: false,
+    };
+
+    const response = await fetch(
+      `${this.vectorDbUrl}/collections/${this.vectorCollection}/points/search`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(searchBody),
+      },
+    );
+
+    const data = await response.json();
+
+    const sources = (data.result || []).map((item: any) => ({
+      articleId: item.payload.articleId,
+      articleTitle: item.payload.title,
+      relevantChunk: item.payload.text,
+    }));
+
+    const contextChunks = sources.map((s) => s.relevantChunk).join('\n');
+    const prompt = `Context:\n${contextChunks}\n\nQuestion: ${body.question}`;
+
+    const answer = await this.geminiService.generateWithGemini(prompt);
+
+    return {
+      answer,
+      sources,
+      conversationId,
+    };
+  }
+
+  async deleteArticleVectors(articleId: string): Promise<boolean> {
+    const filter = {
+      must: [{ key: 'articleId', match: { value: articleId } }],
+    };
+
+    const searchResponse = await fetch(
+      `${this.vectorDbUrl}/collections/${this.vectorCollection}/points/scroll`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          filter,
+          with_payload: false,
+          with_vector: false,
+        }),
+      },
+    );
+
+    const searchData = await searchResponse.json();
+    const pointIds = (searchData.result?.points || []).map((p: any) => p.id);
+
+    if (!pointIds.length) {
+      throw new NotFoundError('No vectors found for the given articleId');
+    }
+
+    await fetch(
+      `${this.vectorDbUrl}/collections/${this.vectorCollection}/points/delete`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ points: pointIds }),
+      },
+    );
+
+    return true;
   }
 }
