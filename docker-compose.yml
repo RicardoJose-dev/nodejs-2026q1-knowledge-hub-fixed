@@ -41,19 +41,20 @@ services:
       - knowledgehub
 
   vectordb:
-    image: qdrant/qdrant
-    container_name: vectordb
+    build:
+      context: .
+      dockerfile: Dockerfile.qdrant
     ports:
       - '6333:6333'
       - '6334:6334'
     volumes:
       - qdrant_data:/qdrant/storage
     healthcheck:
-      test:
-        ['CMD', 'wget', '--spider', '-q', 'http://localhost:6333/collections']
+      test: ['CMD', 'curl', '-fs', 'http://localhost:6333/collections']
       interval: 30s
       timeout: 10s
       retries: 5
+      start_period: 60s
     restart: unless-stopped
     networks:
       - knowledgehub
