@@ -5,6 +5,7 @@ import { CategoryModule } from './category/category.module';
 import { ArticleModule } from './article/article.module';
 import { CommentModule } from './comment/comment.module';
 import { AIModule } from './ai/ai.module';
+import { RagModule } from './ai/rag.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { AIModule } from './ai/ai.module';
     CategoryModule,
     CommentModule,
     AIModule,
+    RagModule,
   ],
 })
 export class AppModule {}
